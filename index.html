@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Gráfica interactiva de la evolución tecnológica histórica: del fuego al año 10^100.">
+<style>*{box-sizing:border-box}html,body{margin:0}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+</head>
+<body>
+<title>Gráfica de la evolución tecnológica histórica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>window.react=window.React</script>
+<script src="https://unpkg.com/lucide-react@0.383.0/dist/umd/lucide-react.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<style>
+/* Layout: escenario a pantalla completa con cámara libre (zoom/arrastre) sobre la curva; HUD inferior compacto. Mundo oscuro único. */
+:root{
+  --bg:#05070d; --ink:#eef3ff; --muted:#8d9bb8; --line:#1b2440; --card:#0b1020;
+  --amber:#f2a33a; --neon:#38c8ff; --violet:#a283ff;
+  --f-display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);overflow-x:hidden;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+#root{height:100%;max-width:1200px;margin:0 auto}
+.app{box-sizing:border-box;height:100%;min-height:560px;display:flex;flex-direction:column;gap:10px;padding-block:10px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px 10px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:800;font-size:clamp(15px,3vw,24px);text-wrap:balance;letter-spacing:-.01em;line-height:1}
+.brand b{background:linear-gradient(90deg,var(--amber),var(--neon) 55%,var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.seg{display:inline-flex;padding:3px;border-radius:999px;background:#0d1222;border:1px solid var(--line)}
+.seg button{display:flex;align-items:center;gap:5px;padding:7px 11px;border-radius:999px;color:var(--muted);font:600 13px var(--f-body);background:none;border:0;cursor:pointer;transition:all .3s;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#05070d}
+.seg.sm button{padding:5px 10px;font-size:12px}
+.stage{position:relative;flex:1;min-height:280px;border-radius:20px;overflow:hidden;border:1px solid var(--line);touch-action:none;user-select:none;-webkit-user-select:none;transition:background 1.1s ease;cursor:grab}
+.stage.dragging{cursor:grabbing}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cam{transition:transform 1.15s cubic-bezier(.65,0,.25,1);transform-origin:0 0}
+.cam.instant{transition:none}
+.cam.soft{transition:transform .35s ease-out}
+.vig{cursor:pointer;transition:opacity .8s}
+.seg-path{transition:stroke-opacity .8s, stroke-width .8s}
+.ctl{position:absolute;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:rgba(5,7,13,.75);border:1px solid rgba(255,255,255,.14);color:var(--ink);cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:transform .2s,opacity .3s}
+.ctl:hover{transform:scale(1.07)}
+.ctl:disabled{opacity:.25;cursor:default;transform:none}
+.zoomstack{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:6px}
+.zoomstack .ctl{position:static;width:36px;height:36px}
+.hint{position:absolute;left:12px;bottom:12px;font:500 11px var(--f-mono);color:var(--muted);background:rgba(5,7,13,.7);padding:5px 9px;border-radius:8px;pointer-events:none;max-width:calc(100% - 80px)}
+.hud{display:flex;flex-direction:column;gap:8px}
+.card{border-radius:18px;padding:12px 16px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;gap:5px;min-height:112px}
+.card.enter{animation:enter .55s cubic-bezier(.2,.8,.2,1) both}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase}
+.pill{padding:3px 8px;border-radius:6px;color:#05070d;font-weight:500}
+.title{font-family:var(--f-display);font-weight:700;font-size:clamp(18px,3.6vw,25px);line-height:1.12;text-wrap:balance}
+.fact{font-size:15.5px;line-height:1.45;color:#d6def0;max-width:70ch}
+.why{font-size:14.5px;line-height:1.5;color:var(--muted);max-width:70ch}
+.whybtn{align-self:flex-start;display:flex;align-items:center;gap:6px;background:none;border:0;padding:2px 0;color:var(--ink);font:600 13px var(--f-body);cursor:pointer}
+.nav{display:flex;align-items:center;gap:8px}
+.nav .btn{display:flex;align-items:center;justify-content:center;gap:6px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 14px var(--f-body);cursor:pointer;padding:0 14px}
+.nav .btn:disabled{opacity:.3;cursor:default}
+.nav .btn.main{flex:1;background:var(--ink);color:#05070d;border-color:var(--ink)}
+.dots{display:flex;gap:5px;justify-content:center;align-items:center;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;border:0;padding:0;cursor:pointer;opacity:.4;transition:all .35s}
+.dot[aria-current="true"]{opacity:1;transform:scale(1.6);box-shadow:0 0 10px currentColor}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--neon),var(--violet) var(--p),#1b2440 var(--p))}
+input[type=range]::-moz-range-track{height:8px;border-radius:8px;background:linear-gradient(90deg,var(--neon),var(--violet) var(--p),#1b2440 var(--p))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-8px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(162,131,255,.35),0 0 18px var(--violet)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 0 4px rgba(162,131,255,.35),0 0 18px var(--violet)}
+.srow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 12px var(--f-mono);color:var(--muted)}
+/* Datos */
+.data{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;gap:10px;padding-bottom:12px}
+.dpanel{border-radius:20px;border:1px solid var(--line);background:radial-gradient(120% 80% at 80% 0%,#0a1630,#05070d 70%);padding:12px;display:flex;flex-direction:column;gap:10px}
+.big{font-family:var(--f-display);font-weight:800;font-size:clamp(40px,9vw,72px);line-height:.95;background:linear-gradient(90deg,var(--neon),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.stmt{font-size:15.5px;line-height:1.45;color:#d6def0;max-width:56ch}
+.stmt b{color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);font:600 12.5px var(--f-body);cursor:pointer}
+.chips button[aria-pressed="true"]{color:#05070d;background:var(--neon);border-color:var(--neon)}
+
+/* Animaciones de escenas */
+.a-glow{transform-box:fill-box;transform-origin:center;animation:aglow 2.6s ease-in-out infinite alternate}
+@keyframes aglow{from{transform:scale(.9)}to{transform:scale(1.08)}}
+.a-flick{transform-box:fill-box;transform-origin:50% 100%;animation:aflick .35s ease-in-out infinite alternate}
+@keyframes aflick{from{transform:scale(1,1)}to{transform:scale(.92,1.1)}}
+.a-rise{animation:arise 3s linear infinite}
+@keyframes arise{from{transform:translateY(0);opacity:.9}to{transform:translateY(-34px);opacity:0}}
+.a-float{animation:afloat 3.2s ease-in-out infinite alternate}
+@keyframes afloat{from{transform:translateY(3px)}to{transform:translateY(-4px)}}
+.a-spin{transform-box:fill-box;transform-origin:center;animation:aspin 9s linear infinite}
+@keyframes aspin{to{transform:rotate(360deg)}}
+/* Odómetro y velocidad */
+.odo{position:absolute;left:12px;top:12px;pointer-events:none;display:flex;flex-direction:column;gap:4px;max-width:calc(100% - 120px)}
+.odo .lab{font:500 10px var(--f-mono);letter-spacing:.2em;color:var(--muted)}
+.odo .num{font-family:var(--f-display);font-weight:800;font-size:clamp(24px,5.4vw,40px);line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.odo .bar{width:150px;max-width:100%;height:5px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.odo .bar i{display:block;height:100%;border-radius:4px;transition:width 1.1s cubic-bezier(.65,0,.25,1)}
+.odo .sp{font:500 11px var(--f-mono);color:#d6def0}
+.flash{position:absolute;inset:0;pointer-events:none;animation:flash 1.2s ease-out both}
+@keyframes flash{from{opacity:.55}to{opacity:0}}
+.stars{transition:transform 1.15s cubic-bezier(.65,0,.25,1)}
+.mini{display:block;width:100%;touch-action:none;cursor:pointer}
+/* Escalera del cómputo */
+.ladder{display:flex;flex-direction:column;gap:6px}
+.rung{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center;text-align:left;background:none;border:1px solid transparent;border-radius:12px;padding:6px 8px;color:var(--ink);cursor:pointer}
+.rung:hover,.rung[aria-expanded="true"]{border-color:var(--line);background:rgba(255,255,255,.02)}
+.rung .ex{font:500 13px var(--f-mono);text-align:right}
+.rung .ex sup{font-size:.7em}
+.rung .bar2{height:7px;border-radius:5px;margin-top:4px}
+.rung .t{font-weight:600;font-size:14px}
+.rung .d{font-size:13.5px;color:var(--muted);line-height:1.45;margin-top:4px}
+
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:-2px}
+.cats::-webkit-scrollbar{display:none}
+.cats button{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);font:600 12.5px var(--f-body);cursor:pointer;transition:all .25s}
+.cats button[aria-pressed="true"]{color:var(--ink);border-color:var(--cc);box-shadow:0 0 14px color-mix(in srgb,var(--cc) 35%,transparent);background:color-mix(in srgb,var(--cc) 12%,var(--card))}
+.cats .n{font:500 10.5px var(--f-mono);opacity:.7}
+.status{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:13px;color:var(--muted);line-height:1.4}
+.status b{color:var(--ink);font-weight:600}
+.vida{display:inline-flex;align-items:center;gap:5px;color:#ff9cc4;font:500 12px var(--f-mono)}
+.odo .rate{font-family:var(--f-display);font-weight:700;font-size:clamp(14px,3.6vw,18px);line-height:1.15}
+.ratecmp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--muted)}
+.ratecmp b{font-family:var(--f-display);font-size:clamp(14px,3.6vw,17px);font-weight:700}
+.ritmo{position:absolute;left:10px;top:10px;padding:8px 10px;border-radius:12px;background:rgba(5,7,13,.8);border:1px solid var(--line);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);pointer-events:none;display:flex;flex-direction:column;gap:3px;max-width:calc(100% - 70px)}
+.ritmo .rt{font:500 9.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.rrow{display:grid;grid-template-columns:62px 44px auto;gap:6px;align-items:center;font-size:10.5px;line-height:1.35}
+.rrow .rn{color:#c9d3e8;white-space:nowrap;font:500 10px var(--f-mono)}
+.rrow b{font:600 10.5px var(--f-mono);white-space:nowrap}
+.rrow .rb{height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.rrow .rb i{display:block;height:100%;border-radius:4px}
+.mrail{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:2px 2px 4px;flex:0 0 auto}
+.mrail::-webkit-scrollbar{display:none}
+.mrail button{scroll-snap-align:start;flex:0 0 132px;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:2px 8px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;transition:border-color .25s,background .25s,color .25s}
+.mrail .mi{grid-row:1/3;display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.05)}
+.mrail .mg{font:500 9.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+.mrail .mn{font:600 13px/1.2 var(--f-body);color:var(--ink)}
+.mrail button[aria-pressed="true"]{border-color:var(--neon);background:color-mix(in srgb,var(--neon) 10%,var(--card));color:var(--neon)}
+.mrail button[aria-pressed="true"] .mi{background:var(--neon);color:#05070d}
+.dhead{display:flex;gap:6px 16px;align-items:flex-end;flex-wrap:wrap}
+.dhead .stmt{flex:1 1 220px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpis div{display:flex;flex-direction:column;gap:3px;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);min-width:0}
+.kpis span{font:500 10px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);line-height:1.25}
+.kpis b{font-family:var(--f-display);font-size:clamp(13px,3.6vw,18px);font-weight:700;line-height:1.15;overflow-wrap:anywhere}
+.ctl-block{display:flex;flex-direction:column;gap:2px}
+.dctl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;align-items:center}
+.dctl .dl{font:500 10.5px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.seg.full{display:flex;min-width:0}
+.seg.full button{flex:1;justify-content:center;padding-left:4px;padding-right:4px}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:rgba(255,181,71,.07);border:1px solid rgba(255,181,71,.22);font-size:14px;line-height:1.5;color:#e6dcc8}
+.note svg{flex:0 0 auto;margin-top:2px}
+.src{font-size:11.5px;color:var(--muted);line-height:1.45}
+.dtip{position:absolute;top:24px;width:220px;background:#0b1020;border:1px solid #ffb547;border-radius:12px;padding:8px 10px;font-size:13px}
+.dtip button{margin-top:4px;background:none;border:0;padding:0;color:var(--neon);font:600 12.5px var(--f-body);cursor:pointer}
+button:focus-visible,input:focus-visible,.vig:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2s ease-out infinite}
+@keyframes pulse{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
+.twinkle{animation:tw 3s ease-in-out infinite alternate}
+@keyframes tw{from{opacity:.25}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.cam,.stage,.vig,.seg-path,.stars,.odo .bar i{transition:none!important}*{animation:none!important}}
+</style>
+
+<div id="root"></div>
+<script>
+(function(){
+const {useState,useEffect,useRef,useMemo,useCallback}=React;
+const html=htm.bind(React.createElement);
+const L=window.LucideReact||{};
+const Ic=({n,size=18,...r})=>{const C=L[n];return C?html`<${C} size=${size} strokeWidth=${2} ...${r}/>`:null};
+/* ───────── Ilustraciones (viewBox 240×130) ───────── */
+const rng=(n,f)=>Array.from({length:n},(_,i)=>f(i)).join("");
+const stars=(n,seed,h=130)=>rng(n,i=>{const x=(i*73+seed*31)%240,y=(i*41+seed*17)%h,r=((i*7)%3)*0.4+0.5;return `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${0.3+(i%4)*0.18}"/>`});
+const ART={
+neolitico:`<rect width="240" height="130" fill="#eab067"/><circle class="a-glow" cx="192" cy="32" r="22" fill="#ffd58a" opacity=".5"/><circle cx="192" cy="32" r="15" fill="#fff2cc"/>
+<path d="M0 82 Q60 62 120 80 T240 72 V130 H0Z" fill="#a8823c"/><path d="M0 98 Q90 86 240 96 V130 H0Z" fill="#735624"/>
+<path d="M24 76 L50 52 L76 76Z" fill="#d6ac5e"/><rect x="31" y="75" width="38" height="24" fill="#5a3a1a"/><rect x="45" y="84" width="10" height="15" fill="#24160a"/>
+${rng(9,i=>{const x=104+i*14,h=30+(i%3)*5;return `<path d="M${x} 124 Q${x+2} ${124-h/2} ${x+4} ${124-h}" stroke="#f0cf73" stroke-width="2" fill="none"/><ellipse cx="${x+4}" cy="${121-h}" rx="3" ry="8" fill="#f7dc8a"/>`})}
+<circle cx="92" cy="90" r="5" fill="#3a2410"/><path d="M92 95 L92 112 M92 100 L84 108 M92 100 L101 96 M92 112 L87 124 M92 112 L97 124" stroke="#3a2410" stroke-width="3" stroke-linecap="round"/>`,
+escritura:`<rect width="240" height="130" fill="#dcb47a"/><rect y="104" width="240" height="26" fill="#a87c45"/>
+<g transform="rotate(-6 66 62)"><rect x="22" y="14" width="88" height="96" rx="12" fill="#b37a40" stroke="#7d5126" stroke-width="3"/>
+${rng(6,r=>rng(5,c=>`<path d="M${36+c*15} ${28+r*13} l9 -3 l0 6z" fill="#6a4220"/>`))}</g>
+<circle cx="176" cy="74" r="40" fill="#8b5a2b" stroke="#5c3815" stroke-width="5"/>
+${rng(4,i=>`<line x1="${152+i*16}" y1="${40+Math.abs(1.5-i)*6}" x2="${152+i*16}" y2="${108-Math.abs(1.5-i)*6}" stroke="#5c3815" stroke-width="2"/>`)}
+<circle cx="176" cy="74" r="9" fill="#3d240c"/>`,
+piramides:`<rect width="240" height="130" fill="#f3c27c"/><rect y="0" width="240" height="40" fill="#f7d39a"/><circle cx="46" cy="30" r="14" fill="#fff4d6"/>
+<path d="M0 106 Q120 92 240 104 V130 H0Z" fill="#d9a052"/>
+<path d="M58 106 L122 34 L150 106Z" fill="#f1c071"/><path d="M122 34 L186 106 L150 106Z" fill="#b8813b"/>
+<path d="M150 106 L186 66 L198 106Z" fill="#eebb6a"/><path d="M186 66 L222 106 L198 106Z" fill="#a8732f"/>
+<path d="M18 106 L44 78 L54 106Z" fill="#eebb6a"/><path d="M44 78 L70 106 L54 106Z" fill="#a8732f"/>
+<path d="M96 118 h6 m6 0 h6 m6 0 h6" stroke="#8a5a20" stroke-width="3" stroke-linecap="round"/>`,
+roma:`<rect width="240" height="130" fill="#a9d0e3"/><path d="M0 70 Q70 52 140 66 T240 60 V130 H0Z" fill="#6f924c"/><path d="M0 112 Q120 100 240 112 V130 H0Z" fill="#4e7036"/>
+<path d="M0 118 Q60 108 120 118 T240 116" stroke="#4fb3e8" stroke-width="7" fill="none"/>
+<rect x="8" y="26" width="224" height="8" fill="#c9b48c"/><rect x="8" y="22" width="224" height="5" fill="#4fb3e8"/>
+<path fill="#e4d4b0" fill-rule="evenodd" d="M8 34 H232 V112 H8Z ${rng(6,i=>{const x=14+i*37;return `M${x} 112 V78 A15 15 0 0 1 ${x+30} 78 V112Z M${x+4} 66 V50 A11 11 0 0 1 ${x+26} 50 V66Z`})}"/>
+<rect x="8" y="66" width="224" height="5" fill="#c9b48c"/>`,
+imprenta:`<rect width="240" height="130" fill="#3b2a1d"/><rect width="240" height="130" fill="#ffb760" opacity=".08"/><rect y="112" width="240" height="18" fill="#26190f"/>
+<rect x="34" y="12" width="12" height="102" fill="#8a5a30"/><rect x="118" y="12" width="12" height="102" fill="#8a5a30"/><rect x="28" y="10" width="108" height="14" rx="3" fill="#a46c3a"/>
+<rect x="78" y="24" width="8" height="30" fill="#c9c3b5"/>${rng(5,i=>`<line x1="78" y1="${28+i*6}" x2="86" y2="${31+i*6}" stroke="#6d675c" stroke-width="1.5"/>`)}
+<line x1="82" y1="38" x2="132" y2="30" stroke="#5a3a1a" stroke-width="4" stroke-linecap="round"/>
+<rect x="56" y="54" width="52" height="9" fill="#6d4524"/><rect x="40" y="88" width="84" height="8" fill="#6d4524"/>
+<path d="M148 84 Q172 76 194 84 Q216 76 232 84 V114 Q216 106 194 114 Q172 106 148 114Z" fill="#f4ead2"/><line x1="194" y1="84" x2="194" y2="114" stroke="#cbbf9e"/>
+${rng(4,i=>`<line x1="${154}" y1="${90+i*5}" x2="${188}" y2="${89+i*5}" stroke="#9b8c6a" stroke-width="1.5"/><line x1="${200}" y1="${89+i*5}" x2="${226}" y2="${90+i*5}" stroke="#9b8c6a" stroke-width="1.5"/>`)}
+<text x="158" y="60" font-family="Georgia,serif" font-size="26" font-weight="700" fill="#f2b55c">A b</text>`,
+vapor:`<rect width="240" height="130" fill="#d4835a"/><rect width="240" height="60" fill="#e7a073"/>
+<path d="M0 92 V60 H20 V40 H30 V60 H60 V50 H74 V30 H82 V50 H110 V92Z M150 92 V56 H178 V36 H186 V56 H214 V44 H240 V92Z" fill="#7a4733"/>
+${rng(6,i=>`<circle class="a-rise" style="animation-delay:${i*0.45}s" cx="${82+i*7}" cy="${30-i*5}" r="${7+i*2}" fill="#efe2d4" opacity="${0.85-i*0.1}"/>`)}
+<rect y="108" width="240" height="22" fill="#4a2d22"/><line x1="0" y1="117" x2="240" y2="117" stroke="#b9a08c" stroke-width="3"/>
+<rect x="44" y="66" width="96" height="32" rx="14" fill="#27272e"/><rect x="132" y="48" width="44" height="50" rx="3" fill="#3a3a44"/><rect x="142" y="56" width="16" height="14" fill="#ffc970"/>
+<rect x="60" y="44" width="14" height="26" fill="#27272e"/><rect x="56" y="40" width="22" height="7" fill="#3a3a44"/>
+<path d="M44 98 L28 112 H48Z" fill="#b8352a"/>
+${[[66,106,12],[100,106,12],[156,108,9]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#141418" stroke="#c99a5a" stroke-width="3"/><circle cx="${x}" cy="${y}" r="3" fill="#c99a5a"/>`).join("")}
+`,
+electricidad:`<rect width="240" height="130" fill="#14213b"/>${stars(18,2,70)}
+<path d="M0 130 V100 H18 V84 H34 V100 H50 V76 H62 V100 H190 V88 H204 V70 H216 V88 H240 V130Z" fill="#0a1222"/>
+${rng(10,i=>`<rect x="${4+i*24}" y="${104+(i%3)*6}" width="4" height="4" fill="#ffd56a" opacity=".8"/>`)}
+<path d="M0 40 Q60 56 120 40 T240 40" stroke="#5b6b8a" stroke-width="1.5" fill="none"/>
+<circle class="a-glow" cx="120" cy="58" r="46" fill="#ffd56a" opacity=".18"/><circle cx="120" cy="58" r="32" fill="#ffd56a" opacity=".22"/>
+<circle cx="120" cy="54" r="24" fill="#fff0b8"/><path d="M110 60 q5 -14 10 0 q5 -14 10 0" stroke="#ff8a2a" stroke-width="2.5" fill="none"/>
+<rect x="110" y="74" width="20" height="16" rx="2" fill="#9aa3b5"/>${rng(3,i=>`<line x1="110" y1="${78+i*4}" x2="130" y2="${78+i*4}" stroke="#5e6578"/>`)}`,
+vuelo:`<rect width="240" height="130" fill="#8ec5e8"/><rect y="70" width="240" height="60" fill="#aed6ef"/>
+<g fill="#fff" opacity=".95"><ellipse cx="40" cy="30" rx="26" ry="10"/><ellipse cx="58" cy="24" rx="16" ry="10"/><ellipse cx="198" cy="48" rx="30" ry="9"/><ellipse cx="180" cy="42" rx="14" ry="8"/></g>
+<path d="M0 110 Q60 96 130 108 T240 104 V130 H0Z" fill="#e5d29b"/>
+<g class="a-float"><g transform="rotate(-6 120 64)"><rect x="66" y="52" width="112" height="6" rx="2" fill="#f4ead0"/><rect x="66" y="72" width="112" height="6" rx="2" fill="#f4ead0"/>
+${[76,100,144,168].map(x=>`<line x1="${x}" y1="58" x2="${x}" y2="72" stroke="#6b5338" stroke-width="2"/>`).join("")}
+<line x1="110" y1="66" x2="210" y2="66" stroke="#6b5338" stroke-width="2"/><rect x="198" y="58" width="16" height="16" fill="#f4ead0"/><rect x="40" y="58" width="16" height="4" fill="#f4ead0"/>
+<line x1="56" y1="60" x2="66" y2="64" stroke="#6b5338" stroke-width="2"/></g></g>`,
+nuclear:`<rect width="240" height="130" fill="#2a1622"/><rect y="60" width="240" height="70" fill="#4d2224"/>
+<circle cx="120" cy="50" r="58" fill="#ff7a3c" opacity=".18"/>
+<path d="M108 120 Q112 90 106 70 H134 Q128 90 132 120Z" fill="#e9a35c"/>
+<g class="a-glow"><circle cx="120" cy="50" r="64" fill="#ffb456" opacity=".25"/></g><ellipse cx="120" cy="52" rx="58" ry="28" fill="#ff8a3d"/><ellipse cx="120" cy="44" rx="48" ry="22" fill="#ffb456"/><ellipse cx="120" cy="38" rx="32" ry="14" fill="#ffe1a0"/>
+<ellipse cx="120" cy="80" rx="34" ry="6" fill="none" stroke="#ffd59a" stroke-width="3" opacity=".7"/>
+<path d="M0 120 Q60 108 120 116 T240 114 V130 H0Z" fill="#1d0c10"/>`,
+luna:`<rect width="240" height="130" fill="#060914"/>${stars(26,5)}
+<circle cx="196" cy="30" r="17" fill="#2f6fd0"/><path d="M186 22 q8 -4 12 4 q-4 8 -12 2z M200 34 q6 2 4 8 q-6 0 -4 -8z" fill="#4caf6a"/>
+<path d="M0 96 Q60 84 120 92 T240 88 V130 H0Z" fill="#9b9ea6"/>
+<ellipse cx="40" cy="112" rx="16" ry="4" fill="#7e818a"/><ellipse cx="190" cy="118" rx="22" ry="5" fill="#7e818a"/><ellipse cx="128" cy="104" rx="8" ry="2.5" fill="#7e818a"/>
+<path d="M78 92 L70 106 M118 92 L126 106" stroke="#c7c9cf" stroke-width="2.5"/><rect x="76" y="70" width="44" height="24" fill="#d8a83a"/><path d="M82 70 L90 56 H106 L114 70Z" fill="#cfd2d8"/>
+<line x1="160" y1="98" x2="160" y2="60" stroke="#ddd" stroke-width="2"/><rect x="160" y="60" width="26" height="16" fill="#e9edf5"/>${rng(3,i=>`<line x1="160" y1="${64+i*4}" x2="186" y2="${64+i*4}" stroke="#c43d3d" stroke-width="1.6"/>`)}<rect x="160" y="60" width="10" height="8" fill="#2a4a9a"/>
+<circle cx="142" cy="78" r="6" fill="#f2f2f2"/><rect x="137" y="83" width="11" height="14" rx="3" fill="#f2f2f2"/><path d="M139 97 v8 M146 97 v8" stroke="#f2f2f2" stroke-width="3.5"/><circle cx="143" cy="77" r="3" fill="#d4a63a"/>`,
+internet:`<rect width="240" height="130" fill="#08162c"/>
+${(()=>{const n=[[176,26],[214,48],[196,92],[160,76],[222,108],[150,112]];return [[0,1],[1,2],[2,3],[3,0],[2,4],[3,5],[2,5]].map(([a,b])=>`<line x1="${n[a][0]}" y1="${n[a][1]}" x2="${n[b][0]}" y2="${n[b][1]}" stroke="#38c8ff" stroke-width="1.2" opacity=".6"/>`).join("")+n.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#38c8ff"/><circle class="a-glow" cx="${x}" cy="${y}" r="10" fill="#38c8ff" opacity=".3"/>`).join("")})()}
+<rect x="18" y="20" width="118" height="80" rx="7" fill="#c7d1e0"/><rect x="25" y="27" width="104" height="64" fill="#0b3666"/>
+<circle cx="77" cy="59" r="25" fill="none" stroke="#59d4ff" stroke-width="1.6"/><ellipse cx="77" cy="59" rx="11" ry="25" fill="none" stroke="#59d4ff" stroke-width="1.4"/><line x1="52" y1="59" x2="102" y2="59" stroke="#59d4ff" stroke-width="1.4"/><path d="M56 46 H98 M56 72 H98" stroke="#59d4ff" stroke-width="1.2"/>
+<rect x="66" y="100" width="22" height="10" fill="#9aa6b8"/><rect x="50" y="110" width="54" height="6" rx="3" fill="#c7d1e0"/>`,
+ia:`<rect width="240" height="130" fill="#050f24"/><circle class="a-glow" cx="120" cy="65" r="60" fill="#38c8ff" opacity=".18"/>
+${rng(8,i=>`<line x1="${92+i*8}" y1="22" x2="${92+i*8}" y2="34" stroke="#38c8ff" stroke-width="2"/><line x1="${92+i*8}" y1="96" x2="${92+i*8}" y2="108" stroke="#38c8ff" stroke-width="2"/><line x1="64" y1="${40+i*7}" x2="76" y2="${40+i*7}" stroke="#38c8ff" stroke-width="2"/><line x1="164" y1="${40+i*7}" x2="176" y2="${40+i*7}" stroke="#38c8ff" stroke-width="2"/>`)}
+<rect x="76" y="34" width="88" height="62" rx="8" fill="#0d2b52" stroke="#38c8ff" stroke-width="2"/>
+${(()=>{const p=[[92,50],[92,80],[120,44],[120,65],[120,86],[148,56],[148,76]];const e=[[0,2],[0,3],[1,3],[1,4],[2,5],[3,5],[3,6],[4,6],[0,4]];return e.map(([a,b])=>`<line x1="${p[a][0]}" y1="${p[a][1]}" x2="${p[b][0]}" y2="${p[b][1]}" stroke="#8fe3ff" stroke-width="1.2" opacity=".7"/>`).join("")+p.map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="4" fill="${i===3?'#fff':'#8fe3ff'}"/>`).join("")})()}
+${stars(14,9)}`,
+trans:`<rect width="240" height="130" fill="#110d2c"/>${stars(14,3)}
+${rng(14,i=>{const x=20+i*7.5,a=Math.sin(i*0.7)*26,b=-a;return `<line x1="${x}" y1="${65+a}" x2="${x}" y2="${65+b}" stroke="#7d6bd6" stroke-width="1.6" opacity=".7"/><circle cx="${x}" cy="${65+a}" r="3.4" fill="#38c8ff"/><circle cx="${x}" cy="${65+b}" r="3.4" fill="#c58bff"/>`})}
+<path d="M196 112 V92 Q174 92 174 74 L168 70 L174 64 Q172 34 196 28 Q224 26 226 58 Q228 82 212 92 V112Z" fill="#1d1846" stroke="#a283ff" stroke-width="2"/>
+<path d="M190 50 H206 V62 H218 M196 70 V80 H212" stroke="#38c8ff" stroke-width="1.6" fill="none"/><circle cx="206" cy="50" r="3" fill="#38c8ff"/><circle cx="218" cy="62" r="3" fill="#38c8ff"/><circle cx="212" cy="80" r="3" fill="#38c8ff"/>`,
+agi:`<rect width="240" height="130" fill="#140a2c"/>${stars(30,7)}
+<circle cx="196" cy="118" r="62" fill="#5b3fd0"/><path d="M140 100 Q196 84 252 104" stroke="#8b6dff" stroke-width="6" fill="none" opacity=".6"/>
+<ellipse cx="196" cy="104" rx="84" ry="14" fill="none" stroke="#d7c8ff" stroke-width="2" opacity=".8"/>
+<g class="a-float"><g transform="rotate(32 84 64)"><path d="M84 18 Q96 34 96 60 V86 H72 V60 Q72 34 84 18Z" fill="#f2f4fb"/><circle cx="84" cy="50" r="6" fill="#38c8ff"/>
+<path d="M72 74 L60 92 H72Z M96 74 L108 92 H96Z" fill="#a283ff"/><path d="M76 86 Q84 118 92 86Z" fill="#ffb347"/><path class="a-flick" d="M79 86 Q84 104 89 86Z" fill="#fff1b8"/></g></g>
+<circle cx="36" cy="34" r="8" fill="#c96f4a"/><circle cx="36" cy="34" r="8" fill="none" stroke="#f0a27a" stroke-width="1"/>`,
+infinito:`<rect width="240" height="130" fill="#07041a"/>${stars(40,11)}
+${rng(5,i=>`<ellipse class="a-glow" style="animation-delay:${i*0.4}s" cx="120" cy="65" rx="${96-i*16}" ry="${34-i*5}" fill="none" stroke="${i%2?'#a283ff':'#38c8ff'}" stroke-width="${1+i*0.3}" opacity="${0.12+i*0.06}" transform="rotate(${-14+i*9} 120 65)"/>`)}
+<circle cx="120" cy="65" r="18" fill="#a283ff" opacity=".25"/>
+<path d="M120 65 C102 40 70 40 70 65 C70 90 102 90 120 65 C138 40 170 40 170 65 C170 90 138 90 120 65Z" fill="none" stroke="#e6ddff" stroke-width="5" stroke-linecap="round"/>
+<path d="M120 65 C102 40 70 40 70 65 C70 90 102 90 120 65 C138 40 170 40 170 65 C170 90 138 90 120 65Z" fill="none" stroke="#a283ff" stroke-width="12" opacity=".25"/>`
+};
+
+
+ART.singularidad=`<rect width="240" height="130" fill="#05030f"/>${stars(34,13)}
+<circle class="a-glow" cx="120" cy="65" r="56" fill="#a283ff" opacity=".2"/>
+<g class="a-spin"><ellipse cx="120" cy="65" rx="104" ry="104" fill="none" stroke="none"/><ellipse cx="120" cy="65" rx="104" ry="22" fill="none" stroke="#ff9a4a" stroke-width="7" opacity=".3"/></g>
+<ellipse cx="120" cy="65" rx="84" ry="16" fill="none" stroke="#ffcf8a" stroke-width="4" opacity=".75"/>
+<circle cx="120" cy="65" r="30" fill="#ffe2b0" opacity=".35"/><circle cx="120" cy="65" r="25" fill="#000" stroke="#ffe8c4" stroke-width="2"/>
+<path d="M36 65 A84 16 0 0 0 204 65" fill="none" stroke="#ffd59a" stroke-width="5"/>`;
+ART.dyson=`<rect width="240" height="130" fill="#070512"/>${stars(30,21)}
+<circle class="a-glow" cx="120" cy="65" r="50" fill="#ffb84a" opacity=".2"/><circle cx="120" cy="65" r="30" fill="#ffcf6a" opacity=".3"/><circle cx="120" cy="65" r="20" fill="#fff1c0"/>
+${[0,60,120].map((r,j)=>`<g transform="rotate(${r} 120 65)">${Array.from({length:18},(_,i)=>{const a=i/18*Math.PI*2,x=120+Math.cos(a)*48,y=65+Math.sin(a)*18;return `<rect x="${(x-3).toFixed(1)}" y="${(y-2).toFixed(1)}" width="6" height="4" fill="${j===1?'#38c8ff':'#a283ff'}" opacity="${Math.sin(a)>0?1:.45}"/>`}).join("")}</g>`).join("")}`;
+ART.fuego=`<rect width="240" height="130" fill="#120a06"/>${stars(22,4,70)}
+<circle class="a-glow" cx="120" cy="92" r="64" fill="#ff7a2a" opacity=".25"/>
+<path d="M0 108 Q120 98 240 108 V130 H0Z" fill="#2a170c"/>
+<g class="a-flick"><path d="M120 104 C94 92 102 68 112 54 C114 70 122 68 120 46 C140 64 148 88 120 104Z" fill="#ff7a2a"/><path d="M120 104 C107 96 109 82 116 72 C118 83 124 81 124 70 C133 84 135 96 120 104Z" fill="#ffd36a"/></g>
+<path d="M96 108 L144 98 M96 98 L144 108" stroke="#5a3418" stroke-width="7" stroke-linecap="round"/>
+${rng(7,i=>`<circle class="a-rise" style="animation-delay:${i*0.42}s" cx="${110+i*4}" cy="58" r="1.7" fill="#ffd36a"/>`)}
+<g fill="#050302"><circle cx="58" cy="76" r="7"/><path d="M48 108 Q50 84 58 84 Q68 84 70 108Z"/><circle cx="184" cy="78" r="7"/><path d="M172 108 Q176 86 184 86 Q194 86 196 108Z"/></g>`;
+ART.cueva=`<rect width="240" height="130" fill="#7a4526"/><circle class="a-glow" cx="30" cy="60" r="90" fill="#ffb060" opacity=".3"/>
+<path d="M0 0 H240 V18 Q180 30 120 20 T0 26Z" fill="#4a2814"/><path d="M0 130 V112 Q80 100 160 112 T240 106 V130Z" fill="#4a2814"/>
+${[[44,64,"#b8341c"],[78,84,"#ecd9b6"],[204,56,"#b8341c"]].map(([x,y,c])=>`<g><circle cx="${x}" cy="${y}" r="21" fill="${c}" opacity=".22"/><path d="M${x-8} ${y+10} V${y-4} M${x-3} ${y+8} V${y-14} M${x+2} ${y+8} V${y-16} M${x+7} ${y+8} V${y-13} M${x+10} ${y+12} L${x+17} ${y+3}" stroke="${c}" stroke-width="4.5" stroke-linecap="round"/><ellipse cx="${x+1}" cy="${y+13}" rx="10" ry="8" fill="${c}"/></g>`).join("")}
+<path d="M112 74 Q118 52 142 54 Q158 44 172 54 Q184 58 180 74 Q176 82 160 80 L132 80 Q116 82 112 74Z" fill="#5a1e10" stroke="#2a0f08" stroke-width="2.5"/>
+<path d="M124 80 L120 96 M134 80 L132 96 M162 80 L164 96 M172 78 L176 94 M112 70 L102 72 M118 56 L112 50" stroke="#2a0f08" stroke-width="3.5" stroke-linecap="round"/>`;
+ART.quantum=`<rect width="240" height="130" fill="#050a22"/>${stars(16,8)}
+<circle class="a-glow" cx="172" cy="60" r="58" fill="#d9a441" opacity=".18"/>
+<g stroke="#8a6a2a" stroke-width="1.2">${rng(7,i=>`<line x1="${154+i*6}" y1="20" x2="${158+i*4.5}" y2="104"/>`)}</g>
+${[[172,12,66],[172,36,54],[172,60,42],[172,82,30],[172,102,20]].map(([x,y,w])=>`<rect x="${x-w/2}" y="${y}" width="${w}" height="7" rx="2" fill="#e6b34f"/><rect x="${x-w/2}" y="${y}" width="${w}" height="2" fill="#fff0b8" opacity=".7"/>`).join("")}
+<rect x="166" y="110" width="12" height="10" fill="#38c8ff"/><circle class="a-glow" cx="172" cy="115" r="11" fill="#38c8ff" opacity=".5"/>
+<circle cx="62" cy="65" r="38" fill="#0d1c48" stroke="#7fa8ff" stroke-width="1.5"/><ellipse cx="62" cy="65" rx="38" ry="11" fill="none" stroke="#7fa8ff" stroke-width="1" stroke-dasharray="3 3"/>
+<line x1="62" y1="22" x2="62" y2="108" stroke="#7fa8ff" stroke-width="1" opacity=".6"/>
+<g class="a-spin"><circle cx="62" cy="65" r="38" fill="none" stroke="none"/><line x1="62" y1="65" x2="84" y2="38" stroke="#fff" stroke-width="2.5"/><circle cx="84" cy="38" r="5" fill="#38c8ff"/></g>
+<text x="16" y="28" fill="#7fa8ff" font-family="JetBrains Mono,monospace" font-size="11">|0⟩</text><text x="16" y="114" fill="#7fa8ff" font-family="JetBrains Mono,monospace" font-size="11">|1⟩</text>`;
+ART.fusion=`<rect width="240" height="130" fill="#10041a"/>${stars(14,6)}
+<circle class="a-glow" cx="120" cy="66" r="66" fill="#ff4fd8" opacity=".18"/>
+<ellipse cx="120" cy="66" rx="92" ry="40" fill="none" stroke="#3a2a5a" stroke-width="22"/>
+<ellipse class="a-glow" cx="120" cy="66" rx="92" ry="40" fill="none" stroke="#ff6ad5" stroke-width="10"/>
+<ellipse cx="120" cy="66" rx="92" ry="40" fill="none" stroke="#ffe0f6" stroke-width="3"/>
+${rng(10,i=>{const a=i/10*Math.PI*2,x=120+Math.cos(a)*92,y=66+Math.sin(a)*40;return `<rect x="${(x-5).toFixed(1)}" y="${(y-15).toFixed(1)}" width="10" height="30" rx="3" fill="#7d8aa8" opacity="${Math.sin(a)>0?1:.5}"/>`})}
+<ellipse cx="120" cy="66" rx="50" ry="17" fill="#10041a"/><circle class="a-glow" cx="120" cy="66" r="9" fill="#fff4c0"/>`;
+ART.matrioshka=`<rect width="240" height="130" fill="#06040f"/>${stars(30,17)}
+<circle class="a-glow" cx="120" cy="65" r="30" fill="#ffcf6a" opacity=".35"/><circle cx="120" cy="65" r="16" fill="#fff1c0"/>
+${[30,42,54].map((r,j)=>`<g class="a-spin" style="animation-duration:${14+j*8}s;${j===1?'animation-direction:reverse':''}"><circle cx="120" cy="65" r="${r}" fill="none" stroke="${['#ffcf6a','#a283ff','#38c8ff'][j]}" stroke-width="5" stroke-dasharray="${5+j*3} ${3+j*2}" opacity="${.95-j*.2}"/></g>`).join("")}`;
+
+/* ───────── Datos ───────── */
+const NOW=2026;
+const H=(id,year,label,era,c,bg,vis,title,fact,why,extra={})=>({id,year,label,era,c,bg,...(ART[vis]?{art:vis}:{icon:vis}),title,fact,why,...extra});
+const HIST=[
+ H("fuego",-400000,"c. 400.000 a.C.","Paleolítico","#ff8a3c","#170b05","fuego","El dominio del fuego","Cocinar libera más energía de la comida y el cerebro humano crece.","Calor, luz, protección y hogueras alrededor de las que nace la conversación."),
+ H("cueva",-40000,"c. 40.000 a.C.","Paleolítico superior","#e07a4a","#1a0c06","cueva","Arte y lenguaje simbólico","Manos y bisontes pintados en cuevas: la mente empieza a representar el mundo.","Los símbolos permiten compartir ideas complejas y transmitirlas a la siguiente generación."),
+ H("neolitico",-10000,"c. 10.000 a.C.","Neolítico","#f2a33a","#1d1407","neolitico","Revolución Neolítica","Domesticamos trigo, cebada y cabras: por primera vez sobra comida.","El excedente libera a artesanos e inventores. Nacen las aldeas y la población se multiplica."),
+ H("escritura",-3500,"c. 3500 a.C.","Edad del Bronce","#e9a446","#1d1509","escritura","La rueda y la escritura","En Mesopotamia aparecen la rueda y las primeras tablillas cuneiformes.","La escritura es memoria externa: el saber deja de morir con quien lo sabe."),
+ H("piramides",-2560,"c. 2560 a.C.","Antiguo Egipto","#f0b55c","#21170a","piramides","Pirámides de Giza","2,3 millones de bloques. La estructura más alta del mundo durante unos 3.800 años.","Miles de personas coordinadas con logística y matemáticas en un solo proyecto."),
+ H("alfabeto",-1050,"c. 1050 a.C.","Edad del Hierro","#e0b070","#1c140a","Type","El alfabeto fenicio","22 letras sustituyen a cientos de signos. De él vienen las letras que estás leyendo.","Leer y escribir deja de ser cosa de una casta de escribas."),
+ H("roma",-200,"c. 200 a.C.","Antigüedad clásica","#d9c48f","#131a12","roma","Ingeniería romana","Acueductos de decenas de kilómetros y un hormigón que aún resiste el mar.","Infraestructura replicable: agua, calzadas y comercio a escala continental."),
+ H("cero",628,"628 d.C.","Edad Media","#e8c27a","#18120a","Binary","El cero","Brahmagupta trata el cero como un número con sus propias reglas.","Sin cero posicional no hay álgebra eficiente, ni contabilidad, ni código binario."),
+ H("polvora",1040,"c. 1040","China Song","#ff9f5a","#1a0d07","Compass","Pólvora y brújula","China describe la fórmula de la pólvora y usa la aguja magnética para navegar.","Cambian la guerra y la navegación: los océanos se vuelven rutas."),
+ H("imprenta",1440,"1440","Renacimiento","#f2b55c","#1b130c","imprenta","Imprenta de Gutenberg","En 50 años circulan millones de libros por toda Europa.","Copiar una idea pasa a costar casi nada: fue el primer internet."),
+ H("ciencia",1687,"1687","Revolución científica","#f4c07a","#16110c","Telescope","Newton y el método científico","Los Principia demuestran que el universo obedece leyes calculables.","La tecnología empieza a alimentarse de teoría, no solo de ensayo y error."),
+ H("vapor",1776,"1776","Revolución Industrial","#ff8a4c","#1d100b","vapor","La máquina de vapor","La energía deja de depender de músculos, agua o viento.","La renta por persona, estancada durante milenios, empieza a crecer sin parar."),
+ H("vacuna",1796,"1796","Ilustración","#7fe0b0","#071a12","Syringe","La primera vacuna","Jenner protege contra la viruela, que acabará erradicada en 1980.","Por primera vez se vence a una enfermedad antes de que llegue."),
+ H("telegrafo",1837,"1837","Siglo XIX","#ffc26a","#1a1208","Cable","El telégrafo","Un mensaje cruza un continente en minutos en lugar de semanas.","La información viaja más rápido que cualquier caballo o barco."),
+ H("electricidad",1879,"1879","2.ª Rev. Industrial","#ffd56a","#0d1426","electricidad","La electricidad","Bombilla, teléfono y red eléctrica: la energía viaja por un cable.","Una tecnología de propósito general que acabará alimentando ordenadores."),
+ H("vuelo",1903,"1903","Siglo XX","#8ec5e8","#0a1824","vuelo","El primer vuelo","12 segundos y 37 metros. Solo 66 años después pisamos la Luna.","El mundo se encoge: personas e ideas cruzan océanos en horas."),
+ H("relatividad",1905,"1905","Siglo XX","#b0b8ff","#0a0c24","Orbit","La relatividad","Einstein une espacio y tiempo y escribe E = mc².","Sin ella no habría GPS, energía nuclear ni cosmología moderna."),
+ H("penicilina",1928,"1928","Siglo XX","#7fe0b0","#071a14","FlaskConical","La penicilina","La esperanza de vida mundial pasa de ~32 años en 1900 a más de 70 hoy.","Más personas viven más años: más talento acumulado."),
+ H("nuclear",1945,"1945","Era atómica","#ff7a3c","#1e0d10","nuclear","La era atómica","La energía del núcleo liberada por primera vez.","Nace la gran ciencia de los estados y la primera tecnología capaz de destruirnos."),
+ H("transistor",1947,"1947","Era atómica","#5fd0ff","#061428","CircuitBoard","El transistor","Hoy caben más de 200.000 millones en un solo chip.","El ladrillo de toda la electrónica: sin él no hay ordenadores ni IA."),
+ H("adn",1953,"1953","Siglo XX","#6ad7d0","#05181f","Dna","La doble hélice del ADN","Watson, Crick y Franklin descubren cómo se escribe la vida.","La biología se convierte en información que se puede leer y editar."),
+ H("sputnik",1957,"1957","Carrera espacial","#c8d4ea","#080c18","Satellite","Sputnik","El primer satélite artificial da la vuelta a la Tierra en 96 minutos.","Empieza la era espacial: comunicaciones, GPS y meteorología."),
+ H("luna",1969,"1969","Carrera espacial","#cfd6e6","#070a16","luna","Apolo 11 en la Luna","El ordenador de a bordo tenía unos 4 KB de memoria.","La demanda de chips de la NASA impulsó la industria de semiconductores."),
+ H("micro",1971,"1971","Era digital","#5fc4ff","#05122a","Cpu","El microprocesador","El Intel 4004 mete un ordenador entero en un chip de 2.300 transistores.","Los ordenadores pasan de salas enteras a caber en cualquier objeto."),
+ H("pc",1981,"1981","Era digital","#55b8ff","#05112a","Monitor","El ordenador personal","El ordenador llega a casas y oficinas.","Millones de personas empiezan a programar, crear y conectar."),
+ H("internet",1991,"1991","Era digital","#38c8ff","#061328","internet","Internet y la Web","La World Wide Web nace en el CERN.","Información que cuesta cero copiar y enviar a cualquier lugar."),
+ H("genoma",2003,"2003","Era digital","#6ad7d0","#04161c","Dna","El genoma humano","Leer el primero costó ~3.000 millones de dólares; hoy, unos cientos.","La medicina empieza a personalizarse gen a gen."),
+ H("smartphone",2007,"2007","Era móvil","#5fb8ff","#05112a","Smartphone","El smartphone","Un ordenador conectado en el bolsillo de la mayoría de la humanidad.","Miles de millones de personas generan los datos que entrenarán a la IA."),
+ H("deep",2012,"2012","Era de los datos","#6aa8ff","#060f2a","Brain","Aprendizaje profundo","Las redes neuronales aprenden a ver: la visión artificial da un salto de golpe.","Las GPU y los datos masivos despiertan una idea de los años 50."),
+ H("crispr",2012.5,"2012","Era de los datos","#6ad7d0","#05181f","Scan","CRISPR","Unas tijeras moleculares que editan el ADN con precisión (Nobel 2020).","Editar la vida pasa a ser tan barato como un experimento de laboratorio."),
+ H("alphafold",2020,"2020","Era de la IA","#7fb8ff","#060f2a","Sparkles","AlphaFold","La IA predice la forma de casi todas las proteínas conocidas (Nobel 2024).","Medio siglo de problema científico resuelto por una máquina."),
+ H("ia",2022,"2022 – hoy","Ahora","#38c8ff","#04112a","ia","IA generativa","Modelos que programan, razonan y escriben con cientos de millones de usuarios.","La primera tecnología que acelera la propia investigación.",{now:true}),
+ H("hquantum",2034,"~2034","Proyección","#7fa8ff","#081030","quantum","Computación cuántica","Ordenadores que calculan con superposición y entrelazamiento.","Simular moléculas y materiales que ningún superordenador clásico puede.",{fut:true}),
+ H("hfusion",2040,"~2040","Proyección","#ff6ad5","#10041a","fusion","Fusión nuclear","Encender un pequeño Sol para producir electricidad.","Energía limpia casi ilimitada para todo lo que viene después.",{fut:true}),
+ H("hagi",2046,"~2046","Proyección","#a283ff","#120a2a","agi","AGI","Una IA que iguala a las personas en casi cualquier tarea intelectual.","Millones de copias investigando a la vez.",{fut:true}),
+ H("hsing",2050,"~2050","Proyección","#ffb46a","#140a06","singularidad","Singularidad","La IA mejora a la IA más rápido de lo que podemos seguir.","Un horizonte de sucesos tecnológico. Sigue en la pestaña Futuro.",{fut:true}),
+ H("infinito",1e100,"año 10¹⁰⁰","El final","#c9b6ff","#08051c","infinito","El final del universo","Hacia el año 10¹⁰⁰ se evapora el último agujero negro: la muerte térmica del universo.","Entre medias caben todos los saltos: de civilización planetaria a galáctica. Explóralos en la pestaña Futuro.",{fut:true})
+];
+
+const fmtInt=n=>{const s=String(Math.round(Math.abs(n)));return (n<0?"-":"")+(s.length>4?s.replace(/\B(?=(\d{3})+(?!\d))/g,"."):s)};
+const fmtYear=y=>y==null?"∞":y>=1e6?yearLabel(y):y<0?fmtInt(-y)+" a.C.":String(Math.round(y));
+function gapOf(a,b){if(!a||b.year==null||a.year==null)return null;return Math.max(0,Math.round(b.year-a.year))}
+function gapLabel(a,b,future){future=b&&b.fut&&a&&a.year>=NOW;const g=gapOf(a,b);if(g==null)return"?";if(g===0)return"mismo año";return (future?"+":"")+bigNum(g)+(g===1?" año":" años")}
+ART.marte=`<rect width="240" height="130" fill="#1a0806"/>${stars(24,31,60)}
+<circle cx="200" cy="26" r="9" fill="#cfd6e6" opacity=".6"/>
+<path d="M0 84 Q60 70 120 80 T240 74 V130 H0Z" fill="#b8492a"/><path d="M0 104 Q90 92 240 102 V130 H0Z" fill="#8a3018"/>
+${[[60,84,26],[112,82,34],[168,84,22]].map(([x,y,r])=>`<path d="M${x-r} ${y} A${r} ${r} 0 0 1 ${x+r} ${y}Z" fill="#9fe0ff" opacity=".28" stroke="#cfefff" stroke-width="1.5"/><path d="M${x-r*.6} ${y} Q${x} ${y-r*.5} ${x+r*.6} ${y}Z" fill="#4caf6a" opacity=".8"/><circle class="a-glow" cx="${x}" cy="${y-r*.5}" r="2" fill="#ffd56a"/>`).join("")}
+<g class="a-float"><path d="M206 98 Q212 70 218 98Z" fill="#f2f4fb"/><path class="a-flick" d="M208 98 Q212 112 216 98Z" fill="#ffb347"/></g>`;
+ART.longevidad=`<rect width="240" height="130" fill="#1a0814"/>${stars(16,41)}
+<circle class="a-glow" cx="120" cy="65" r="58" fill="#ff7fb0" opacity=".16"/>
+<g class="a-spin" style="animation-duration:16s"><circle cx="120" cy="65" r="50" fill="none" stroke="none"/>${rng(16,i=>{const a=i/16*Math.PI*2;return `<circle cx="${(120+Math.cos(a)*50).toFixed(1)}" cy="${(65+Math.sin(a)*50).toFixed(1)}" r="2.6" fill="${i%2?'#ff7fb0':'#6ad7d0'}"/>`})}</g>
+<path d="M98 26 H142 M98 104 H142" stroke="#ffd0e4" stroke-width="4" stroke-linecap="round"/>
+<path d="M102 28 Q102 52 120 65 Q102 78 102 102 H138 Q138 78 120 65 Q138 52 138 28Z" fill="none" stroke="#ffd0e4" stroke-width="2.5"/>
+<path d="M108 96 Q120 80 132 96 V100 H108Z" fill="#ff7fb0"/><path d="M110 34 H130 Q126 48 120 56 Q114 48 110 34Z" fill="#ff7fb0" opacity=".55"/>`;
+ART.telescopio=`<rect width="240" height="130" fill="#060a1c"/>${stars(36,51,90)}
+<path d="M0 112 Q60 96 120 106 T240 100 V130 H0Z" fill="#2a2030"/>
+<path d="M70 106 A50 50 0 0 1 170 106Z" fill="#c9cfdb"/><path d="M70 106 A50 50 0 0 1 170 106" fill="none" stroke="#8a93a8" stroke-width="2"/>
+<path d="M112 58 L128 58 L132 106 H108Z" fill="#05070d" opacity=".55"/>
+<path class="a-glow" d="M120 58 L176 4 L196 4 Z" fill="#38c8ff" opacity=".35"/>
+<g class="a-spin" style="animation-duration:30s"><circle cx="200" cy="30" r="24" fill="none" stroke="none"/><ellipse cx="200" cy="30" rx="22" ry="7" fill="#ffd08a" opacity=".5"/><circle cx="200" cy="30" r="4" fill="#fff4d0"/></g>`;
+ART.cosmos=`<rect width="240" height="130" fill="#020108"/>${stars(50,61)}
+<circle class="a-glow" cx="70" cy="70" r="36" fill="#ff5a2a" opacity=".35"/><circle cx="70" cy="70" r="24" fill="#ff7a3c"/><circle cx="70" cy="70" r="24" fill="none" stroke="#ffb07a" stroke-width="2"/>
+<g class="a-spin" style="animation-duration:40s"><ellipse cx="176" cy="58" rx="50" ry="50" fill="none" stroke="none"/>${rng(4,i=>`<ellipse cx="176" cy="58" rx="${48-i*10}" ry="${16-i*3}" fill="none" stroke="${i%2?'#a283ff':'#9fd0ff'}" stroke-width="${1.5+i*.5}" opacity="${.3+i*.15}" transform="rotate(${-20+i*12} 176 58)"/>`)}</g>
+<circle cx="176" cy="58" r="6" fill="#fff"/>`;
+const CATS={
+ todo:{name:"Todo",icon:"Infinity",c:"#eef3ff"},
+ ia:{name:"IA y robots",icon:"Bot",c:"#38c8ff"},
+ cuerpo:{name:"Vida y longevidad",icon:"HeartPulse",c:"#ff7fb0"},
+ cuantica:{name:"Cuántica",icon:"Atom",c:"#9fb4ff"},
+ computo:{name:"Cómputo",icon:"Cpu",c:"#6ae0d0"},
+ energia:{name:"Energía",icon:"Zap",c:"#ffc75a"},
+ espacio:{name:"Exploración espacial",icon:"Rocket",c:"#ff8a5c"},
+ astro:{name:"Astronomía y cosmos",icon:"Telescope",c:"#c9a8ff"}
+};
+const BG={ia:"#04112a",cuerpo:"#1a0814",cuantica:"#081030",computo:"#041816",energia:"#1c1308",espacio:"#1a0a06",astro:"#0c0820"};
+const SUP="⁰¹²³⁴⁵⁶⁷⁸⁹";const sup=n=>String(n).split("").map(d=>SUP[+d]).join("");
+function bigNum(g){g=Math.round(g);if(g<1e6)return fmtInt(g);if(g<1e9){const v=g/1e6;return (v%1?v.toFixed(1).replace(".",","):fmtInt(v))+" millones"}if(g<1e12){const v=g/1e9;return (v%1?v.toFixed(1).replace(".",","):fmtInt(v*1000))+" millones"}return "10"+sup(Math.round(Math.log10(g)))}
+function yearLabel(y){if(y==null)return"∞";if(y<0)return fmtInt(-y)+" a.C.";if(y<1e5)return fmtInt(y);if(y<1e6)return fmtInt(y);return "año "+bigNum(y)}
+const F=(year,id,cat,vis,conf,title,fact,why,st,vida,k)=>({id:"f-"+id,year,off:year-NOW,cat,...(ART[vis]?{art:vis}:{icon:vis}),c:CATS[cat].c,bg:BG[cat],conf,title,fact,why,st,vida,k});
+const FUT_ALL=[
+ F(2026,"hoy","ia","ia","Ahora","Hoy: IA generativa","La IA ya escribe código, diseña chips y acelera laboratorios.","Todo lo que viene se apoya en una investigación que empieza a automatizarse."),
+ // 2027
+ F(2027,"agentes","ia","Bot","Probable","Agentes de IA que trabajan solos","Sistemas que completan tareas de días enteros con supervisión mínima.","Cada persona que sabe dirigirlos multiplica lo que produce.","METR mide que la duración de las tareas que completa la IA se duplica cada ~7 meses."),
+ F(2027,"traduccion","ia","Languages","Probable","Traducción universal en tiempo real","Hablas en español y te escuchan en japonés, con tu propia voz.","La barrera del idioma, presente desde Babel, empieza a desaparecer."),
+ F(2027,"vacunacancer","cuerpo","Syringe","Probable","Vacuna de ARNm contra el cáncer","Una vacuna personalizada para cada tumor, diseñada a partir de su ADN.","El sistema inmune aprende a cazar el cáncer concreto de cada paciente.","Superó la fase 3 en melanoma en agosto de 2026. Moderna habla de posibles pacientes en 2027."),
+ F(2027,"perros","cuerpo","Dog","Probable","Primer fármaco que alarga la vida","LOY-002, pensado para alargar la vida de perros mayores, busca la aprobación condicional.","Si funciona en perros, será la primera prueba regulatoria de que el envejecimiento se puede tratar.","La FDA ya aceptó la eficacia esperada y la seguridad; Loyal prevé pedir la aprobación condicional en 2027."),
+ F(2027,"sparc","energia","Sun","Probable","SPARC enciende su plasma","El reactor de Commonwealth Fusion busca producir más energía de la que consume.","La prueba de que los imanes superconductores hacen viable la fusión compacta.","En construcción. Previsto para 2027, sin conexión a la red."),
+ F(2027,"repostaje","espacio","Rocket","Probable","Repostaje en órbita","Starship transfiere combustible entre naves en el espacio.","Sin repostaje orbital no hay viajes tripulados a la Luna ni a Marte."),
+ F(2027,"tianwen2","espacio","Orbit","Probable","Muestras de un asteroide","La misión china Tianwen-2 trae a la Tierra polvo del asteroide Kamoʻoalewa, quizá un trozo de la Luna.","Cada muestra cuenta cómo se formó el sistema solar.","Lanzada en mayo de 2025."),
+ F(2027,"roman","astro","telescopio","Probable","Telescopio Roman: el gran mapa","Un campo de visión 100 veces mayor que el del Hubble; medirá unos mil millones de galaxias.","Para entender la energía oscura y encontrar miles de planetas.","Lanzado el 30 de agosto de 2026; primeras imágenes a principios de 2027."),
+ F(2027,"eclipse","astro","Sun","Seguro","Eclipse total en España","El 2 de agosto de 2027 la Luna tapa el Sol durante más de 4 minutos en el sur de España.","El eclipse total más largo visible desde tierra en lo que queda de siglo.","Fecha calculada con precisión de segundos."),
+ F(2027,"ventajaq","cuantica","Atom","Plausible","Ventaja cuántica útil","Un ordenador cuántico resuelve un problema químico real mejor que cualquier superordenador.","Pasar de las demostraciones de laboratorio a resultados con valor práctico.","En 2024 el chip Willow de Google corrigió errores por debajo del umbral crítico."),
+ // 2028
+ F(2028,"helion","energia","fusion","Plausible","Primera electricidad de fusión","Helion se ha comprometido a vender electricidad de fusión a Microsoft.","La energía de las estrellas entraría en la red una década antes de lo previsto.","Helion afirma ir en plazo para 2028; muchos expertos lo dudan."),
+ F(2028,"luna","espacio","luna","Plausible","Volvemos a pisar la Luna","Artemis IV: primeros humanos en la superficie lunar desde 1972.","El inicio de una presencia estable y de una economía cislunar.","Artemis II sobrevoló la Luna en abril de 2026; el alunizaje apunta a 2027–2028."),
+ F(2028,"humanoides","ia","PersonStanding","Probable","Robots humanoides en fábricas","Robots de uso general trabajando junto a personas en almacenes y líneas de montaje.","La IA sale de la pantalla y empieza a mover el mundo físico."),
+ F(2028,"cientifico","ia","FlaskConical","Plausible","IA científica autónoma","Sistemas que plantean hipótesis, diseñan experimentos y publican resultados.","La ciencia deja de estar limitada por las horas de los investigadores."),
+ F(2028,"blindsight","cuerpo","Eye","Plausible","Implantes que devuelven la vista","Un chip en la corteza visual envía imágenes de una cámara directamente al cerebro.","Por primera vez, una máquina sustituye un sentido completo.","Neuralink prepara los primeros implantes Blindsight en humanos."),
+ F(2028,"diabetes","cuerpo","Pill","Plausible","Curar la diabetes tipo 1","Células madre convertidas en productoras de insulina sustituyen a las que se perdieron.","Una enfermedad crónica de por vida, resuelta con una sola terapia."),
+ F(2028,"baterias","energia","Battery","Plausible","Baterías de estado sólido","Coches eléctricos con más autonomía, carga en minutos y menos riesgo de incendio.","El almacenamiento es la pieza que le falta a la energía renovable."),
+ F(2028,"dragonfly","astro","Plane","Probable","Dragonfly despega hacia Titán","Un dron nuclear volará por la luna de Saturno con lagos de metano.","Titán tiene la química que pudo dar origen a la vida.","Lanzamiento previsto en 2028; llegada en 2034."),
+ // 2029
+ F(2029,"starling","cuantica","quantum","Plausible","Ordenador cuántico tolerante a fallos","IBM Starling: 200 qubits lógicos corregidos que ejecutan 100 millones de operaciones.","Simular moléculas y materiales que ningún superordenador clásico puede.","Hoja de ruta oficial de IBM para 2029."),
+ F(2029,"xeno","cuerpo","HeartPulse","Plausible","Órganos de cerdo para humanos","Riñones de cerdo editados genéticamente trasplantados en ensayos clínicos.","Se acaban las listas de espera de órganos.","Los primeros ensayos clínicos formales empezaron en 2025."),
+ F(2029,"turing","ia","Brain","Especulativo","IA a nivel humano según Kurzweil","Kurzweil lleva décadas prediciendo que en 2029 una IA superará un test de Turing riguroso.","Una máquina indistinguible de una persona experta.","Metaculus (feb. 2026): 25 % de probabilidad de AGI en 2029."),
+ F(2029,"apofis","astro","Orbit","Seguro","Apofis roza la Tierra","El 13 de abril de 2029 un asteroide de 340 m pasa a unos 32.000 km, más cerca que los satélites geoestacionarios.","Será visible a simple vista y lo estudiarán varias sondas.","Órbita calculada: no hay riesgo de impacto."),
+ F(2029,"elt","astro","telescopio","Probable","El ELT abre su ojo de 39 metros","El mayor telescopio óptico de la historia, en Chile.","Podrá fotografiar exoplanetas rocosos y analizar su atmósfera.","Primera luz técnica prevista en marzo de 2029; ciencia desde diciembre de 2030."),
+ F(2029,"ska","astro","Satellite","Plausible","SKA: el mayor radiotelescopio","Miles de antenas en Australia y Sudáfrica escuchan el universo primitivo.","Ver cómo se encendieron las primeras estrellas… y buscar señales artificiales."),
+ // 2030
+ F(2030,"autonomos","ia","Car","Probable","Coches sin conductor en las ciudades","Robotaxis circulando a diario en decenas de grandes ciudades.","1,2 millones de personas mueren al año en carretera, casi siempre por error humano."),
+ F(2030,"robotcasa","ia","Home","Plausible","Robots domésticos","Robots que ponen lavadoras, recogen y cocinan en casas normales.","El trabajo doméstico, una parte enorme del tiempo humano, se automatiza."),
+ F(2030,"xprize","cuerpo","Dumbbell","Plausible","Rejuvenecer 10 años el cuerpo","El Healthspan XPRIZE premia terapias que devuelvan a personas de 60–80 años la función física de una década antes.","La primera vez que se mide el rejuvenecimiento en humanos.","Competición en marcha; resultados previstos para 2030."),
+ F(2030,"farmacoia","cuerpo","Pill","Probable","Fármacos diseñados por IA","Medicamentos descubiertos y optimizados por IA llegan a las farmacias.","Pasar de 10–15 años por fármaco a una fracción del tiempo y del coste."),
+ F(2030,"smr","energia","Factory","Plausible","Minirreactores nucleares","Reactores modulares pequeños fabricados en serie como si fueran aviones.","Energía firme y sin emisiones para centros de datos y ciudades.","El primer BWRX-300 se construye en Ontario (Canadá)."),
+ F(2030,"chinaluna","espacio","Moon","Probable","China llega a la Luna","Astronautas chinos alunizan con la nave Mengzhou y el módulo Lanyue.","Una nueva carrera espacial acelera los plazos de todos.","China mantiene el objetivo de alunizar antes de 2030."),
+ F(2030,"iss","espacio","Satellite","Probable","Adiós a la Estación Espacial","La ISS se desorbita y estaciones privadas toman el relevo.","El espacio cercano pasa a ser un negocio, no solo un laboratorio de estados.","NASA contrató a SpaceX para desorbitarla hacia 2030."),
+ F(2030,"clipper","astro","Globe","Probable","Europa Clipper llega a Júpiter","Sobrevuela 49 veces Europa, una luna con un océano bajo el hielo.","Uno de los mejores lugares del sistema solar para buscar vida.","Lanzada en 2024; llegada prevista en abril de 2030."),
+ F(2030,"pqc","cuantica","Shield","Seguro","Fin de la criptografía clásica","Los gobiernos abandonan RSA y adoptan criptografía resistente a ordenadores cuánticos.","Se protegen hoy los secretos que un ordenador cuántico podría leer mañana.","El NIST retirará RSA en 2030 y lo prohibirá en 2035."),
+ F(2030,"redq","cuantica","Network","Plausible","Primeras redes cuánticas","Ciudades conectadas por fibras que transmiten entrelazamiento.","Comunicaciones imposibles de espiar sin ser detectado."),
+ // 2031–2035
+ F(2031,"neuro","computo","Brain","Plausible","Chips neuromórficos","Hardware que imita a las neuronas: aprende consumiendo vatios, no megavatios.","Tu cerebro funciona con unos 20 W. Copiar ese truco cambia la escala de la IA."),
+ F(2031,"juice","astro","Orbit","Probable","JUICE llega a Ganímedes","La sonda europea estudia las lunas heladas de Júpiter.","Ganímedes guarda más agua que todos los océanos de la Tierra.","Llegada prevista en julio de 2031."),
+ F(2031,"tianwen3","espacio","marte","Plausible","Primeras rocas de Marte en la Tierra","Tianwen-3 trae muestras marcianas.","Buscar en laboratorios terrestres huellas de vida antigua en Marte."),
+ F(2031,"genesoneshot","cuerpo","Dna","Plausible","Colesterol corregido de una vez","Una sola inyección de edición genética baja el colesterol para toda la vida.","La edición genética pasa de enfermedades raras a problemas que afectan a millones."),
+ F(2032,"bioimpresion","cuerpo","Printer","Plausible","Órganos impresos en 3D","Bioimpresoras fabrican tejidos y órganos con las células del propio paciente.","Órganos de repuesto sin rechazo y sin donante."),
+ F(2032,"foton","computo","Aperture","Plausible","Computación con luz","Chips fotónicos en los centros de datos de IA.","Mucha más velocidad con una fracción de la energía."),
+ F(2032,"qday","cuantica","Unlock","Especulativo","Q-Day: la criptografía clásica cae","Un ordenador cuántico capaz de romper el cifrado RSA-2048.","Lo que no se haya migrado a criptografía post-cuántica quedará expuesto.","Gidney (2025) estimó que bastaría con menos de un millón de qubits durante menos de una semana."),
+ F(2033,"agi","ia","agi","Especulativo","Inteligencia artificial general","Una IA que iguala a personas expertas en casi cualquier tarea intelectual.","Millones de copias investigando a la vez.","Metaculus (feb. 2026): 50 % de probabilidad en 2033."),
+ F(2033,"arc","energia","Factory","Plausible","Central de fusión comercial","ARC, 400 MW en Virginia: la primera central de fusión diseñada para vender electricidad.","Energía limpia casi ilimitada: el combustible de los demás saltos.","Prevista para principios de los 2030 si SPARC funciona."),
+ F(2033,"solar1","energia","Sun","Probable","La solar, primera fuente del mundo","La energía solar supera al carbón y al gas como mayor fuente de electricidad.","La energía más barata de la historia pasa a ser la más usada."),
+ F(2033,"marte1","espacio","marte","Especulativo","Primeros humanos en Marte","Una tripulación pisa otro planeta por primera vez.","La especie deja de depender de un único planeta."),
+ F(2033,"bluejay","cuantica","quantum","Plausible","2.000 qubits lógicos","La siguiente generación cuántica de IBM, Blue Jay, multiplica por diez la potencia de Starling.","Química, logística y materiales a una escala útil para la industria."),
+ F(2034,"reprogramacion","cuerpo","RefreshCw","Especulativo","Reprogramación celular","Terapias basadas en los factores de Yamanaka rejuvenecen tejidos humanos.","No retrasar el envejecimiento: revertirlo célula a célula."),
+ F(2034,"titan","astro","Plane","Probable","Dragonfly vuela sobre Titán","El primer dron en otro mundo con atmósfera densa.","Buscar química prebiótica en un mundo con ríos de metano."),
+ F(2034,"iter","energia","fusion","Probable","ITER empieza a investigar","El mayor experimento de fusión del mundo, en Francia, comienza sus operaciones científicas.","35 países colaborando para demostrar la fusión a escala de central.","Nuevo calendario: investigación desde 2034, plasmas de deuterio-tritio en 2039."),
+ F(2035,"lev","cuerpo","longevidad","Especulativo","Velocidad de escape de la longevidad","La medicina añade más de un año de esperanza de vida por cada año que pasa.","Kurzweil la sitúa entre 2029 y 2035; de Grey le da un 50 % de probabilidad para mediados de los 2030.","Hoy la esperanza de vida sube unos 3 meses por año.","Sin techo fijo"),
+ F(2035,"zetta","computo","Gauge","Plausible","Zettaescala","Superordenadores mil veces más potentes que los mayores de hoy.","Simular el clima, el cerebro o una célula entera con detalle molecular."),
+ F(2035,"lisa","astro","Waves","Plausible","LISA escucha el espacio-tiempo","Tres naves separadas 2,5 millones de km detectan ondas gravitacionales.","Oír fusiones de agujeros negros supermasivos en todo el universo.","Misión adoptada por la ESA en 2024; lanzamiento previsto hacia 2035."),
+ F(2035,"rubin","astro","telescopio","Probable","Rubin termina su película del cielo","10 años filmando todo el cielo austral: unos 20.000 millones de galaxias.","Mapas de la materia oscura y alertas de asteroides peligrosos.","Empezó a observar en 2025."),
+ F(2035,"quimicaq","cuantica","FlaskConical","Plausible","Fertilizantes y fármacos cuánticos","Simulación cuántica de moléculas como la FeMoco, clave para fabricar fertilizantes con menos energía.","El proceso Haber-Bosch consume alrededor del 1–2 % de la energía mundial."),
+ F(2035,"baselunar","espacio","Moon","Plausible","Bases lunares permanentes","Tripulaciones rotatorias extraen hielo en el polo sur lunar.","Agua, oxígeno y combustible fabricados fuera de la Tierra."),
+ F(2035,"nobelia","ia","Award","Especulativo","Un Nobel para un descubrimiento de IA","Una IA hace un descubrimiento científico de primer nivel por sí sola.","La IA deja de ser herramienta y pasa a ser investigadora."),
+ // 2036–2050
+ F(2036,"antiedad","cuerpo","Pill","Especulativo","Primer fármaco antienvejecimiento","Se aprueba un medicamento para frenar el envejecimiento en humanos, no una enfermedad concreta.","Tratar la causa común de casi todas las enfermedades a la vez."),
+ F(2037,"alzheimer","cuerpo","Brain","Plausible","Alzheimer frenado antes de los síntomas","Diagnóstico por análisis de sangre y tratamiento años antes del deterioro.","La mayor causa de pérdida de autonomía en la vejez, bajo control."),
+ F(2038,"bcisanos","cuerpo","trans","Especulativo","Implantes cerebrales para personas sanas","Interfaces neuronales que amplían memoria, atención o comunicación.","El transhumanismo pasa de la medicina a la mejora voluntaria."),
+ F(2038,"turismo","espacio","Building2","Plausible","Hoteles en órbita","Viajes de una semana a estaciones privadas.","El espacio se abre a miles de personas, no a cientos."),
+ F(2039,"itertd","energia","fusion","Plausible","ITER quema deuterio y tritio","Plasmas con el combustible real de una central de fusión.","El último paso científico antes de las centrales de demostración."),
+ F(2040,"vida90","cuerpo","HeartPulse","Plausible","Esperanza de vida de 90 años","En los países más longevos, la media supera los 90 años.","Más vida sana significa más experiencia y talento acumulados.",null,"~90 años de media"),
+ F(2040,"solarorb","energia","Satellite","Especulativo","Energía solar desde el espacio","Colectores en órbita envían energía a la Tierra, día y noche.","Captar el Sol sin noches ni nubes."),
+ F(2040,"vidaext","astro","Microscope","Especulativo","Primera prueba de vida extraterrestre","Una biofirma en la atmósfera de un exoplaneta o rastros microbianos en Marte o Europa.","Responder a la pregunta más antigua: ¿estamos solos?"),
+ F(2040,"sensoresq","cuantica","Activity","Plausible","Sensores cuánticos por todas partes","Navegación sin GPS, escáneres cerebrales portátiles, detección de minerales bajo tierra.","Medir el mundo con una precisión imposible hasta ahora."),
+ F(2042,"nanobots","cuerpo","Microscope","Especulativo","Nanorobots médicos","Máquinas microscópicas en la sangre reparan células y eliminan tumores.","El mantenimiento del cuerpo pasa a ser continuo y automático."),
+ F(2045,"sing","ia","singularidad","Especulativo","La singularidad","Kurzweil la sitúa en 2045: la IA mejora a la IA en un bucle que se acelera solo.","Un horizonte de sucesos tecnológico: más allá, predecir se vuelve casi imposible."),
+ F(2045,"asi","ia","Sparkles","Especulativo","Superinteligencia","Mentes artificiales muy por encima de cualquier humano en todos los campos.","Puede resolver problemas atascados durante siglos… o crear riesgos nuevos."),
+ F(2045,"hwo","astro","telescopio","Plausible","Buscando otra Tierra","El Habitable Worlds Observatory fotografía planetas como el nuestro alrededor de otras estrellas.","Analizar su luz en busca de oxígeno, agua y metano."),
+ F(2045,"internetq","cuantica","Globe","Especulativo","Internet cuántico global","Satélites y fibras reparten entrelazamiento por todo el planeta.","Ordenadores cuánticos conectados entre sí como hoy lo están los clásicos."),
+ F(2047,"hlmi","ia","Users","Plausible","IA de alto nivel según los investigadores","La mediana de los investigadores en IA da un 50 % de probabilidad a esta fecha.","La distancia entre 2033 y 2047 muestra lo mucho que discrepan los expertos.","Encuesta Grace et al. (2023) a autores de IA."),
+ F(2048,"cuerpomodular","cuerpo","Bone","Especulativo","Cuerpo modular","Órganos sintéticos, exoesqueletos y prótesis superiores a las biológicas.","Reparar o mejorar cualquier parte del cuerpo como quien cambia una pieza."),
+ F(2050,"calment","cuerpo","longevidad","Especulativo","Superar a Jeanne Calment","Alguien supera los 122 años y 164 días, el récord de longevidad humana desde 1997.","El techo biológico conocido se rompe por primera vez.",null,"123+ años"),
+ F(2050,"ciudadmarte","espacio","marte","Especulativo","Ciudad en Marte","Miles de personas viviendo bajo cúpulas en otro planeta.","Una segunda civilización en marcha."),
+ F(2050,"fusiongrid","energia","Zap","Especulativo","La fusión entra en la red","Una parte relevante de la electricidad mundial sale de centrales de fusión.","Energía limpia sin límite práctico de combustible."),
+ // 2051–2200
+ F(2055,"adncomp","computo","Microscope","Especulativo","Computación con ADN","Un gramo de ADN puede guardar unos 215 millones de GB.","La materia biológica empieza a funcionar como hardware."),
+ F(2060,"vida120","cuerpo","longevidad","Especulativo","Vidas sanas de 120 años","Llegar a los 120 con el cuerpo de alguien de 60.","Carreras, familias y proyectos que duran un siglo.",null,"120 años sanos"),
+ F(2061,"halley","astro","Sparkles","Seguro","Vuelve el cometa Halley","En julio de 2061 regresa el cometa más famoso, 75 años después de su última visita.","Una cita con fecha fija: quizá ya haya sondas esperándolo.","Órbita conocida desde Edmond Halley (1705)."),
+ F(2065,"starshot","espacio","Telescope","Especulativo","Velas de luz hacia Alfa Centauri","Microsondas de gramos impulsadas por láser al 20 % de la velocidad de la luz.","Llegarían en unos 20 años: la primera visita a otra estrella."),
+ F(2070,"upload","cuerpo","trans","Especulativo","Subir la mente","Escanear un cerebro con detalle suficiente para ejecutarlo en un ordenador.","La identidad deja de depender de un cuerpo biológico."),
+ F(2075,"vida100","cuerpo","HeartPulse","Especulativo","Esperanza de vida de 100 años","Vivir un siglo pasa a ser lo normal, no la excepción.","Las pensiones, el trabajo y la familia se reinventan.",null,"100 años de media"),
+ F(2080,"reversible","computo","RefreshCw","Especulativo","Computación reversible","Ordenadores que casi no disipan calor, rozando el límite de Landauer.","Hoy un chip gasta miles de millones de veces más energía por operación que el mínimo físico."),
+ F(2090,"oneill","espacio","Orbit","Especulativo","Hábitats orbitales","Cilindros de O'Neill con ciudades, campos y gravedad artificial.","Vivir en el espacio sin necesidad de un planeta."),
+ F(2100,"vida150","cuerpo","Hourglass","Especulativo","Vidas de 150 años","El envejecimiento se trata como una enfermedad más.","Morir de viejo deja de ser inevitable.",null,"150+ años"),
+ F(2126,"k1","energia","Globe","Especulativo","Civilización planetaria","Nos acercamos al tipo I de Kardashev: la energía de todo un planeta.","Gestionar clima, energía y recursos del planeta como un único sistema."),
+ F(2150,"vida1000","cuerpo","longevidad","Especulativo","Vidas de 1.000 años","Aubrey de Grey sostiene que la primera persona que vivirá 1.000 años quizá ya haya nacido.","Si el daño del envejecimiento se repara más rápido de lo que se acumula, no hay edad máxima.",null,"~1.000 años"),
+ F(2176,"computronium","computo","Grid3x3","Especulativo","Computronium","Materia organizada átomo a átomo para calcular lo máximo posible.","Montañas enteras convertidas en ordenador."),
+ // Lejano
+ F(2276,"terra","espacio","TreePine","Especulativo","Terraformar Marte","Darle a Marte atmósfera y agua líquida tras siglos de ingeniería.","Un segundo mundo habitable a cielo abierto.",null,null,"≈ 1,1"),
+ F(2526,"dyson","energia","dyson","Especulativo","Enjambre de Dyson","Millones de colectores orbitando el Sol captan buena parte de su energía.","Tipo II: la energía de una estrella entera.",null,null,"→ 2"),
+ F(2726,"matrioshka","computo","matrioshka","Especulativo","Cerebro Matrioshka","Capas de computronium alrededor del Sol: un ordenador del tamaño de un sistema solar.","Unas 10⁴² operaciones por segundo: más que todos los cerebros humanos de la historia juntos, cada instante.",null,null,"2"),
+ F(3026,"estelar","espacio","Rocket","Especulativo","Colonias en otras estrellas","Naves generacionales o sondas con embriones llegan a sistemas cercanos.","La humanidad se convierte en una especie interestelar.",null,null,"2+"),
+ F(12026,"limitecalc","computo","Cpu","Especulativo","El límite último del cálculo","1 kg de materia al límite de la física haría 5×10⁵⁰ operaciones por segundo (Seth Lloyd).","Más allá no hay ingeniería que valga: solo las leyes del universo.",null,null,"2,5"),
+ F(102026,"galaxia","espacio","infinito","Especulativo","Civilización galáctica","Sondas autorreplicantes recorren toda la Vía Láctea en unos 100.000 años.","Tipo III: la energía de cien mil millones de estrellas.",null,null,"→ 3"),
+ // Cosmos (estimaciones de la física)
+ F(1e9,"oceanos","astro","cosmos","Estimación","La Tierra deja de ser habitable","El Sol, cada vez más brillante, evapora los océanos dentro de unos mil millones de años.","Para entonces la vida tendrá que estar en otra parte."),
+ F(5e9,"gigante","astro","cosmos","Estimación","El Sol, gigante roja","El Sol se hincha y engulle Mercurio, Venus y quizá la Tierra.","Fin del sistema solar tal como lo conocemos."),
+ F(1e10,"andromeda","astro","infinito","Estimación","Andrómeda y la Vía Láctea","Un estudio de 2025 da un 50 % de probabilidad de que ambas galaxias se fusionen en los próximos 10.000 millones de años.","Nuestra galaxia acabaría convertida en una gran elíptica."),
+ F(1e14,"ultimaestrella","astro","cosmos","Estimación","Se apaga la última estrella","Las enanas rojas, que viven billones de años, son las últimas en extinguirse.","Fin de la era estelar: el universo se queda a oscuras."),
+ F(1e100,"final","astro","singularidad","Estimación","El final: año 10¹⁰⁰","Se evapora el último agujero negro. El universo llega a su muerte térmica.","Un gúgol de años: el último hito que la física sabe calcular.")
+].map(p=>({...p,fut:p.off!==0,now:p.off===0,era:p.conf,
+  label:p.off===0?"2026 · hoy":p.off<=10?String(p.year):p.year<1e6?`${yearLabel(p.year)} · dentro de ${bigNum(p.off)} años`:`dentro de ${bigNum(p.off)} años`,
+  k:p.k||(p.off<=100?((Math.log10(2e13*Math.pow(1.03,p.off))-6)/10).toFixed(2).replace(".",","):null)}));
+const futFor=cat=>cat==="todo"?FUT_ALL:FUT_ALL.filter((p,i)=>i===0||p.cat===cat||p.id==="f-final");
+const ALL=[...HIST.filter(h=>!h.fut),...FUT_ALL.slice(1)];
+const PHASES=[[-400000,-3500,"Prehistoria"],[-3500,1440,"Antigüedad y Edad Media"],[1440,1879,"Renacimiento e Industria"],[1879,1971,"Siglo XX"],[1971,2026,"Era digital"],[2026,2030,"2027–2030"],[2030,2050,"2030–2050"]].map(([a,b,name])=>{
+  const idxs=ALL.map((s,i)=>i).filter(i=>{const y=ALL[i].year;return y!=null&&(a===-400000?y>=a:y>a)&&y<=b});
+  const cnt=a===-400000?idxs.length-1:idxs.length;return {a,b,name,idxs,rate:cnt/(b-a)}});
+function rateText(r){if(r>=1){const v=Math.round(r*10)/10;return (String(v).replace(".",","))+" hitos al año"}const y=1/r;const rr=y>=1000?Math.round(y/1000)*1000:y>=100?Math.round(y/10)*10:Math.round(y);return "1 hito cada "+fmtInt(rr)+(rr===1?" año":" años")}
+function localRate(stops,i){const ok=j=>stops[j]&&stops[j].year!=null&&stops[j].year<5e4;let j0=i,j1=i,k=0;while(k<4){let moved=false;if(j0>0&&ok(j0-1)){j0--;k++;moved=true}if(k<4&&j1<stops.length-1&&ok(j1+1)){j1++;k++;moved=true}if(!moved)break}
+  const span=stops[j1].year-stops[j0].year;if(!(span>0))return null;return (j1-j0)/span}
+const RMIN=Math.log10(1/150000),RMAX=Math.log10(12);
+
+
+/* ───────── Geometría ───────── */
+const S=420,VW=240,VH=172;
+const expo=(x,k)=>(Math.exp(k*x)-1)/(Math.exp(k)-1);
+const TH=2200,TEND=2100,LMAX=Math.log10(TH+400000),TU=2400;
+const TX=y=>120+(LMAX-Math.log10(TH-y))*TU;
+const TICKS=[-100000,-10000,-1000,1000,1500,1800,1900,1950,2000,2050,2100];
+function layout(stops,k){
+  const n=stops.length,DY=112;
+  const xs=[];let bi=-1;for(let i=0;i<n;i++){const y=stops[i].year;if(y!=null&&y<=TEND)xs.push(TX(y));else{if(bi<0)bi=i;xs.push(TX(TEND)+60+(i-bi)*14)}}
+  const BASE=(n-1)*DY+320;
+  const pts=stops.map((s,i)=>({x:xs[i],y:BASE-i*DY,side:i%2?"L":"R"}));
+  const cr=(p0,p1,p2,p3)=>{const t=6;return [p1.x+(p2.x-p0.x)/t,p1.y+(p2.y-p0.y)/t,p2.x-(p3.x-p1.x)/t,p2.y-(p3.y-p1.y)/t]};
+  const segs=[];let full=`M${pts[0].x} ${pts[0].y}`;
+  for(let i=0;i<n-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;const[c1x,c1y,c2x,c2y]=cr(p0,p1,p2,p3);
+    const c=`C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y}`;full+=" "+c;
+    segs.push({d:`M${p1.x.toFixed(1)} ${p1.y} ${c}`,mx:.125*p1.x+.375*c1x+.375*c2x+.125*p2.x,my:.125*p1.y+.375*c1y+.375*c2y+.125*p2.y});}
+  const lead=`M${pts[0].x-700} ${BASE+4} L${pts[0].x} ${pts[0].y}`;
+  const minX=-360,maxX=pts[n-1].x+VW+120,minY=pts[n-1].y-VH-120,maxY=BASE+VH+120;
+  return {pts,segs,full,lead,base:BASE,bi,box:{x:minX,y:minY,w:maxX-minX,h:maxY-minY}};
+}
+function useSize(ref){const[s,setS]=useState({w:360,h:420});useEffect(()=>{if(!ref.current)return;const ro=new ResizeObserver(e=>{const r=e[0].contentRect;setS({w:Math.max(240,r.width),h:Math.max(60,r.height)})});ro.observe(ref.current);return()=>ro.disconnect()},[]);return s}
+
+/* ───────── Viñeta ───────── */
+function Vignette({s,i,x,y,side,active,dim,onClick}){
+  const R=side!=="L";const vx=R?x+30:x-30-VW,vy=R?y+30:y-30-VH;const cx0=R?0:VW,cy0=R?0:VH;
+  return html`<g className="vig" style=${{opacity:dim?0.3:1}} tabIndex="0" role="button" aria-label=${s.title}
+     onClick=${onClick} onKeyDown=${e=>{if(e.key==="Enter"){e.preventDefault();onClick()}}}>
+    <path d=${`M${x} ${y} L${vx+cx0} ${vy+cy0}`} stroke=${s.c} strokeWidth="1.5" strokeDasharray="3 4" opacity=".7"/>
+    <g transform=${`translate(${vx} ${vy})`}>
+      ${active&&html`<rect x="-8" y="-8" width=${VW+16} height=${VH+16} rx="20" fill=${s.c} opacity=".18" filter="url(#glow)"/>`}
+      <clipPath id=${"c"+s.id}><rect width=${VW} height=${VH} rx="14"/></clipPath>
+      <g clipPath=${`url(#c${s.id})`}>
+        ${s.art?html`<g dangerouslySetInnerHTML=${{__html:ART[s.art]}}></g>`:html`<g>
+          <rect width="240" height="130" fill=${s.bg}/>
+          <circle className="a-glow" cx="120" cy="65" r="62" fill=${s.c} opacity=".14"/>
+          <g className="a-spin"><circle cx="120" cy="65" r="47" fill="none" stroke=${s.c} strokeOpacity=".5" strokeDasharray="2 6" strokeWidth="2"/><circle cx="167" cy="65" r="3" fill=${s.c}/></g>
+          <circle cx="120" cy="65" r="31" fill=${s.c} opacity=".2"/>
+          <${Ic} n=${s.icon} size=${40} x=${100} y=${45} color=${s.c}/>
+          ${[0,1,2,3,4,5,6,7,8,9].map(k=>html`<circle key=${k} cx=${(k*53+11)%240} cy=${(k*37+9)%130} r=${k%3?0.8:1.4} fill="#fff" opacity=".5"/>`)}
+        </g>`}
+        <rect y="130" width=${VW} height="42" fill="#0a0e1c"/>
+        <text x="12" y="147" fill=${s.c} fontSize="10.5" fontFamily="JetBrains Mono, monospace" letterSpacing=".5">${s.label.toUpperCase()}</text>
+        <text x="12" y="164" fill="#eef3ff" fontSize="12.5" fontWeight="700" fontFamily="Unbounded, Arial Black, sans-serif">${s.title.length>27?s.title.slice(0,26)+"…":s.title}</text>
+      </g>
+      <rect width=${VW} height=${VH} rx="14" fill="none" stroke=${active?s.c:"rgba(255,255,255,.14)"} strokeWidth=${active?3:1}/>
+      <circle cx=${cx0} cy=${cy0} r="13" fill=${s.c}/><text x=${cx0} y=${cy0+4.5} textAnchor="middle" fill="#05070d" fontSize="11" fontWeight="700" fontFamily="JetBrains Mono, monospace">${i+1}</text>
+    </g>
+  </g>`;
+}
+
+/* ───────── Odómetro de años ───────── */
+function Odometer({stop,prev,overview,future,n,i}){
+  const [shown,setShown]=useState(stop.year);
+  const cur=useRef(stop.year);
+  useEffect(()=>{const to=stop.year;if(to==null||cur.current==null||Math.abs(to)>=1e6||Math.abs(cur.current)>=1e6){cur.current=to;setShown(to);return}
+    const from=cur.current;const t0=performance.now();const D=1100;let raf;
+    const step=t=>{const p=Math.min(1,(t-t0)/D);const e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;const v=from+(to-from)*e;cur.current=v;setShown(v);if(p<1)raf=requestAnimationFrame(step)};
+    raf=requestAnimationFrame(step);return()=>cancelAnimationFrame(raf)},[stop.id]);
+  if(overview)return null;
+  const g=gapOf(prev,stop);
+  const r=localRate(ALL,ALL.findIndex(s=>s.id===stop.id));
+  const speed=r==null?1:Math.max(0.04,Math.min(1,(Math.log10(r)-RMIN)/(RMAX-RMIN)));
+  return html`<div className="odo">
+    <span className="lab">${stop.fut?"AÑO PROYECTADO":"AÑO"}</span>
+    <span className="num" style=${{color:stop.c,textShadow:`0 0 24px ${stop.c}66`}}>${fmtYear(shown==null?null:Math.abs(shown)>=1e6?shown:Math.round(shown))}</span>
+    <span className="rate" style=${{color:stop.c}}>${r==null?"más allá de toda escala":rateText(r)}</span>
+    <div className="bar"><i style=${{width:speed*100+"%",background:`linear-gradient(90deg,#f2a33a,#38c8ff 70%,#a283ff)`}}></i></div>
+  </div>`;
+}
+
+/* ───────── Escenario ───────── */
+function Stage({stops,future,idx,overview,onPick}){
+  const ref=useRef(null);const {w,h}=useSize(ref);
+  const k=3.6;
+  const G=useMemo(()=>layout(stops,k),[stops]);
+  const nowI=stops.findIndex(s=>s.now);
+  const [free,setFree]=useState(null);
+  const [drag,setDrag]=useState(false);
+  const [touched,setTouched]=useState(false);
+  useEffect(()=>{const t=setTimeout(()=>setTouched(true),7000);return()=>clearTimeout(t)},[]);
+  useEffect(()=>{setFree(null)},[idx,overview,stops]);
+
+  const b=G.box;const fitS=Math.min(w/b.w,h/b.h)*0.96;
+  let cam;
+  if(free)cam=free;
+  else if(overview)cam={s:fitS,tx:w/2-(b.x+b.w/2)*fitS,ty:h/2-(b.y+b.h/2)*fitS};
+  else{const p=G.pts[idx];const L=p.side==="L";const bw=VW+30+150,bh=VH+30+150;const bx=L?p.x-30-VW-60:p.x-90,by=L?p.y-30-VH-60:p.y-90;const s=Math.min(w/bw,h/bh,2.1);
+    const ox=w<560?22:-w*0.1;cam={s,tx:w/2-(bx+bw/2)*s-ox,ty:h/2-(by+bh/2)*s+40}}
+  const camRef=useRef(cam);camRef.current=cam;
+  const minS=fitS*0.7,maxS=4;
+  const zoomAt=(px,py,f)=>{const c=camRef.current;const s=Math.max(minS,Math.min(maxS,c.s*f));const r=s/c.s;setTouched(true);setFree({s,tx:px-(px-c.tx)*r,ty:py-(py-c.ty)*r})};
+
+  const P=useRef(new Map());const g=useRef(null);const swallow=useRef(false);
+  const rel=e=>{const r=ref.current.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+  const onDown=e=>{if(e.target.closest&&e.target.closest("button"))return;P.current.set(e.pointerId,rel(e));
+    const pts=[...P.current.values()];const c=camRef.current;
+    if(pts.length===1)g.current={type:"pan",x:pts[0].x,y:pts[0].y,c,moved:false};
+    else if(pts.length===2){const d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),m={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};g.current={type:"pinch",d,m,c,moved:true}}};
+  const onMove=e=>{if(!P.current.has(e.pointerId)||!g.current)return;P.current.set(e.pointerId,rel(e));const pts=[...P.current.values()];const G0=g.current;
+    if(G0.type==="pan"&&pts.length===1){const dx=pts[0].x-G0.x,dy=pts[0].y-G0.y;if(!G0.moved&&Math.hypot(dx,dy)<6)return;G0.moved=true;setDrag(true);setTouched(true);setFree({s:G0.c.s,tx:G0.c.tx+dx,ty:G0.c.ty+dy})}
+    else if(G0.type==="pinch"&&pts.length===2){const d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),m={x:(pts[0].x+pts[1].x)/2,y:(pts[0].y+pts[1].y)/2};
+      const s=Math.max(minS,Math.min(maxS,G0.c.s*d/G0.d));const wx=(G0.m.x-G0.c.tx)/G0.c.s,wy=(G0.m.y-G0.c.ty)/G0.c.s;setDrag(true);setTouched(true);setFree({s,tx:m.x-wx*s,ty:m.y-wy*s})}};
+  const onUp=e=>{P.current.delete(e.pointerId);if(g.current&&g.current.moved){swallow.current=true;setTimeout(()=>swallow.current=false,80)}
+    if(P.current.size===1){const pt=[...P.current.values()][0];g.current={type:"pan",x:pt.x,y:pt.y,c:camRef.current,moved:true}}else if(P.current.size===0){g.current=null;setDrag(false)}};
+  useEffect(()=>{const el=ref.current;if(!el)return;const f=e=>{e.preventDefault();const p=rel(e);zoomAt(p.x,p.y,Math.exp(-e.deltaY*0.0018))};el.addEventListener("wheel",f,{passive:false});return()=>el.removeEventListener("wheel",f)},[minS]);
+  const pick=i=>{if(swallow.current)return;setFree(null);onPick(i)};
+
+  const cur=stops[idx];
+  const grad=stops.map((st,i)=>html`<stop key=${i} offset=${(i/(stops.length-1)).toFixed(3)} stopColor=${st.c}/>`);
+  const x0=G.pts[0].x,x1=G.pts[G.pts.length-1].x;
+  const far=cam.s<0.3;
+  const ns=far?"non-scaling-stroke":undefined;
+  const starsL=useMemo(()=>Array.from({length:70},(_,i)=>({x:(i*0.6180339+0.13)%1,y:(i*0.7548777+0.37)%1,r:i%5?0.8:1.6,l:i%3})),[]);
+  const camCls="cam"+(drag?" instant":free?" soft":"");
+
+  return html`<div ref=${ref} className=${"stage"+(drag?" dragging":"")} style=${{background:`radial-gradient(120% 90% at 70% 10%, ${cur.bg}, #05070d 75%)`}}
+     onPointerDown=${onDown} onPointerMove=${onMove} onPointerUp=${onUp} onPointerCancel=${onUp} onPointerLeave=${e=>{if(e.pointerType==="mouse")onUp(e)}}>
+    <div key=${"fl"+cur.id+overview} className="flash" style=${{background:`radial-gradient(60% 60% at 50% 50%, ${cur.c}55, transparent 70%)`}}></div>
+    <svg viewBox=${`0 0 ${w} ${h}`} aria-label="Curva exponencial de la evolución tecnológica">
+      <defs>
+        <linearGradient id="curveG" gradientUnits="userSpaceOnUse" x1=${x0} y1="0" x2=${x1} y2="0">${grad}</linearGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="spark"><stop offset="0" stopColor="#fff"/><stop offset=".4" stopColor="#bfe9ff"/><stop offset="1" stopColor="#38c8ff" stopOpacity="0"/></radialGradient>
+      </defs>
+      ${[0,1,2].map(l=>html`<g key=${"L"+l} className=${drag?"":"stars"} style=${{transform:`translate(${((cam.tx*(0.01+l*0.02))%w+w)%w-w}px,${((cam.ty*(0.01+l*0.02))%h+h)%h-h}px)`}}>
+        ${starsL.filter(s=>s.l===l).flatMap((s,i)=>[0,1].flatMap(a=>[0,1].map(b2=>html`<circle key=${i+"-"+a+b2} className=${i%4===0?"twinkle":undefined} cx=${s.x*w+a*w} cy=${s.y*h+b2*h} r=${s.r*(1+l*0.3)} fill="#fff" opacity=${0.25+l*0.2}/>`)))}
+      </g>`)}
+      <g className=${camCls} style=${{transform:`translate(${cam.tx}px,${cam.ty}px) scale(${cam.s})`}}>
+        <path d=${G.lead} stroke=${stops[0].c} strokeOpacity=".35" strokeWidth="3" fill="none" strokeDasharray="2 8" vectorEffect=${ns}/>
+        ${G.segs.map((sg,i)=>{const lit=overview||free||i<idx;const fut=nowI>=0&&i>=nowI;
+          return html`<path key=${"g"+i} className="seg-path" d=${sg.d} fill="none" stroke="#38c8ff" strokeWidth=${lit?6:4} strokeOpacity=${lit?1:0.45} strokeLinecap="round" strokeDasharray=${fut?"12 10":undefined} vectorEffect=${ns} filter=${lit&&!far?"url(#glow)":undefined}/>`})}
+        ${[0,1,2,3,4,5,6,7].map(i=>html`<circle key=${"pt"+i} r=${far?Math.max(6,4/cam.s):6} fill="url(#spark)">
+          <animateMotion dur=${(stops.length*0.9)+"s"} begin=${(-i*stops.length*0.9/8)+"s"} repeatCount="indefinite" path=${G.full} keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.4 0 1 1"/></circle>`)}
+        ${!far&&G.segs.map((sg,i)=>{const t=gapLabel(stops[i],stops[i+1],future);const lw=t.length*7.2+18;return html`<g key=${"l"+i} style=${{opacity:free||overview||Math.abs(i-idx+0.5)<=2.5?1:0.35,transition:"opacity .6s"}} pointerEvents="none">
+            <rect x=${sg.mx-lw/2} y=${sg.my-11} width=${lw} height="22" rx="11" fill="#05070d" stroke=${stops[i+1].c} strokeOpacity=".8"/>
+            <text x=${sg.mx} y=${sg.my+4} textAnchor="middle" fill="#eef3ff" fontSize="12" fontWeight="500" fontFamily="JetBrains Mono, monospace">${t}</text>
+          </g>`})}
+        <g pointerEvents="none">${(()=>{let last=-1e9;const fs=far?11/cam.s:13;return TICKS.map(t=>{const x=TX(t);const sx=x*cam.s;const lab=t<0?fmtInt(-t)+" a.C.":String(t);const half=(lab.length*(far?6.8:8)+10)/2;if(sx-half<last)return null;last=sx+half;return html`<g key=${"tk"+t}>
+            <line x1=${x} x2=${x} y1=${G.base+30} y2=${G.base+30+fs*.8} stroke="#4a5a78" strokeWidth=${1.5} vectorEffect=${ns}/>
+            <text x=${x} y=${G.base+30+fs*2.1} textAnchor="middle" fill="#6d7d9c" fontSize=${fs} fontFamily="JetBrains Mono, monospace">${t<0?fmtInt(-t)+" a.C.":t}</text></g>`})})()}
+          <line x1=${G.pts[0].x-700} x2=${TX(TEND)} y1=${G.base+30} y2=${G.base+30} stroke="#24305a" strokeWidth="1.5" vectorEffect=${ns}/>
+          ${G.bi>0&&html`<text x=${G.pts[G.bi].x-(far?14/cam.s:300)} textAnchor="end" y=${(G.pts[G.bi].y+G.pts[G.bi-1].y)/2} fill="#a283ff" fontSize=${far?11/cam.s:16} fontWeight="700" fontFamily="Unbounded, sans-serif">≈ MÁS ALLÁ DE 2100</text>`}
+        </g>
+        ${nowI>=0&&html`<g pointerEvents="none">
+          <line x1=${G.box.x} x2=${G.box.x+G.box.w} y1=${G.pts[nowI].y} y2=${G.pts[nowI].y} stroke="#38c8ff" strokeOpacity=".5" strokeDasharray="6 8" strokeWidth="2" vectorEffect=${ns}/>
+          <text x=${G.box.x+(far?10/cam.s:40)} y=${G.pts[nowI].y-(far?8/cam.s:14)} fill="#38c8ff" fontSize=${far?13/cam.s:22} fontWeight="800" fontFamily="Unbounded, sans-serif">HOY ↑ FUTURO</text>
+        </g>`}
+        ${stops.map((st,i)=>html`<${Vignette} key=${st.id} s=${st} i=${i} x=${G.pts[i].x} y=${G.pts[i].y} side=${G.pts[i].side} active=${!overview&&!free&&i===idx} dim=${!overview&&!free&&Math.abs(i-idx)>1} onClick=${()=>pick(i)}/>`)}
+        ${stops.map((st,i)=>html`<g key=${"p"+st.id} onClick=${()=>pick(i)} style=${{cursor:"pointer"}}>
+          ${!overview&&i===idx&&html`<circle className="pulse" cx=${G.pts[i].x} cy=${G.pts[i].y} r="9" fill="none" stroke="#ffb547" strokeWidth="3"/>`}
+          <circle cx=${G.pts[i].x} cy=${G.pts[i].y} r=${far?3/cam.s:9} fill="#ffb547" stroke="#05070d" strokeWidth=${far?1:3} vectorEffect=${ns} filter=${far?undefined:"url(#glow)"}/>
+        </g>`)}
+      </g>
+    </svg>
+    <${Odometer} stop=${cur} prev=${stops[idx-1]} overview=${overview||!!free} future=${future} n=${stops.length} i=${idx}/>
+    ${!touched&&html`<div className="hint">${far?"Pellizca o usa la rueda para acercarte":"Arrastra para moverte · pellizca para zoom"}</div>`}
+    <div className="zoomstack">
+      <button className="ctl" aria-label="Acercar" onClick=${()=>zoomAt(w/2,h/2,1.6)}><${Ic} n="Plus" size=${18}/></button>
+      <button className="ctl" aria-label="Alejar" onClick=${()=>zoomAt(w/2,h/2,1/1.6)}><${Ic} n="Minus" size=${18}/></button>
+    </div>
+  </div>`;
+}
+
+/* ───────── Minimapa arrastrable ───────── */
+function MiniMap({stops,idx,overview,k,onPick}){
+  const ref=useRef(null);const {w}=useSize(ref);const h=54;
+  const n=stops.length;const LG=useMemo(()=>layout(stops,k),[stops]);const X0=LG.pts[0].x,XW=LG.pts[n-1].x-X0,YB=LG.pts[0].y,YH=YB-LG.pts[n-1].y;
+  const px=i=>10+(LG.pts[i].x-X0)/XW*(w-20),py=i=>h-8-(h-16)*(YB-LG.pts[i].y)/YH;
+  const d=stops.map((_,i)=>(i?"L":"M")+px(i).toFixed(1)+" "+py(i).toFixed(1)).join(" ");
+  const dl=stops.slice(0,idx+1).map((_,i)=>(i?"L":"M")+px(i).toFixed(1)+" "+py(i).toFixed(1)).join(" ");
+  const down=useRef(false);const last=useRef(-1);
+  const at=e=>{const r=ref.current.getBoundingClientRect();const x=e.clientX-r.left;let bi=0,bd=1e9;for(let i=0;i<n;i++){const d=Math.abs(px(i)-x);if(d<bd){bd=d;bi=i}}return bi};
+  const set=e=>{const i=at(e);if(i!==last.current){last.current=i;onPick(i)}};
+  return html`<div ref=${ref}><svg className="mini" width=${w} height=${h} viewBox=${`0 0 ${w} ${h}`} role="slider" aria-label="Recorrer los hitos" aria-valuemin="1" aria-valuemax=${n} aria-valuenow=${idx+1}
+     onPointerDown=${e=>{down.current=true;last.current=-1;set(e)}} onPointerMove=${e=>{if(down.current)set(e)}} onPointerUp=${()=>down.current=false} onPointerLeave=${()=>down.current=false}>
+    <defs><linearGradient id="mg" x1="0" x2="1"><stop offset="0" stopColor="#f2a33a"/><stop offset=".65" stopColor="#38c8ff"/><stop offset="1" stopColor="#a283ff"/></linearGradient></defs>
+    <path d=${d} fill="none" stroke="#24305a" strokeWidth="2"/>
+    ${!overview&&html`<path d=${dl} fill="none" stroke="#38c8ff" strokeWidth="3"/>`}
+    ${stops.map((s,i)=>html`<circle key=${s.id} cx=${px(i)} cy=${py(i)} r=${!overview&&i===idx?6:2.6} fill="#ffb547" opacity=${overview||i<=idx?1:0.45} style=${{transition:"r .3s"}}/>`)}
+    ${!overview&&html`<circle cx=${px(idx)} cy=${py(idx)} r="11" fill="none" stroke=${stops[idx].c} strokeOpacity=".5"/>`}
+  </svg></div>`;
+}
+
+/* ───────── Datos reales ───────── */
+const fmtBig=(v,d=1)=>{const a=Math.abs(v);const f=(x,s)=>(x>=100?fmtInt(x):x.toFixed(x>=10?0:d).replace(".",","))+s;
+  if(a>=1e12)return f(v/1e12," billones");if(a>=1e9)return f(v/1e9," mil M");if(a>=1e6)return f(v/1e6," M");return a>=1000?fmtInt(v):String(Math.round(v*10)/10).replace(".",",")};
+const fmtSci=v=>{const e=Math.floor(Math.log10(v));const m=v/Math.pow(10,e);return (m>=9.95?"10":m.toFixed(m<10?1:0).replace(".",",").replace(",0",""))+"×10"+sup(e)};
+const SERIES={
+ pop:{group:"Humanidad",name:"Población",icon:"Users",s0:-10000,unit:"personas",src:"McEvedy & Jones; ONU (World Population Prospects)",
+  pts:[[-10000,4e6],[-5000,5e6],[-4000,7e6],[-3000,14e6],[-2000,27e6],[-1000,50e6],[-500,100e6],[1,170e6],[1000,265e6],[1500,425e6],[1700,610e6],[1800,900e6],[1900,1.6e9],[1950,2.5e9],[1975,4.06e9],[2000,6.1e9],[2026,8.25e9]],
+  fmt:v=>fmtInt(v/1e6)+" M",note:"Hicieron falta unos 200.000 años para llegar a los primeros 1.000 millones (hacia 1804). Los últimos 1.000 millones llegaron en 12 años."},
+ vida:{group:"Humanidad",name:"Esperanza de vida",icon:"HeartPulse",s0:1770,unit:"años",src:"Riley (2005), ONU vía Our World in Data",
+  pts:[[1770,28.5],[1800,28.8],[1870,29.7],[1900,32],[1913,34.1],[1950,46.5],[1973,60],[1990,64],[2000,66.8],[2010,70.1],[2019,72.8],[2021,71],[2026,73.5]],
+  fmt:v=>v.toFixed(1).replace(".",",")+" años",note:"Durante casi toda la historia se vivía de media menos de 30 años. Desde 1900 la esperanza de vida mundial se ha más que duplicado."},
+ pobreza:{group:"Humanidad",name:"Pobreza extrema",icon:"TrendingDown",s0:1820,down:true,pctDown:true,unit:"% de la población",src:"Bourguignon & Morrisson (2002), Banco Mundial vía Our World in Data (aprox.)",
+  pts:[[1820,76],[1850,72],[1900,66],[1950,55],[1970,48],[1990,38],[2000,29],[2010,16],[2019,9],[2026,8.5]],
+  fmt:v=>Math.round(v)+" %",note:"En 1820 tres de cada cuatro personas vivían en pobreza extrema. Hoy, menos de una de cada diez, con una población ocho veces mayor."},
+ alfab:{group:"Humanidad",name:"Alfabetización",icon:"BookOpen",s0:1820,unit:"% de adultos",src:"van Zanden et al., UNESCO vía Our World in Data (aprox.)",
+  pts:[[1820,12],[1870,19],[1900,21],[1930,33],[1950,42],[1970,63],[1990,76],[2000,82],[2016,86],[2026,88]],
+  fmt:v=>Math.round(v)+" %",note:"En 1820 solo una de cada ocho personas adultas sabía leer. Hoy lo hacen casi nueve de cada diez."},
+ pib:{group:"Economía",name:"Riqueza mundial",icon:"Coins",s0:1,unit:"PIB, billones de $ int. de 2011",src:"Maddison Project vía Our World in Data (aprox.)",
+  pts:[[1,0.18],[1000,0.21],[1500,0.43],[1700,0.64],[1820,1.2],[1870,1.9],[1913,4],[1950,9.3],[1973,27],[2000,63],[2010,88],[2019,125],[2026,145]],
+  fmt:v=>(v>=10?fmtInt(v):v.toFixed(1).replace(".",","))+" billones $",note:"Durante 1.800 años la economía mundial apenas se movió. Hoy produce en un año más que la humanidad entera entre el año 1 y 1900."},
+ energy:{group:"Economía",name:"Energía",icon:"Zap",s0:1800,unit:"TWh al año",src:"Vaclav Smil; Energy Institute vía Our World in Data",
+  pts:[[1800,5650],[1850,7100],[1900,12100],[1950,28600],[1970,57000],[1990,92000],[2000,117000],[2010,150000],[2023,183000],[2026,186000]],
+  fmt:v=>fmtInt(v)+" TWh",note:"Hasta 1800 casi toda la energía venía de la madera, los músculos y el viento. Los combustibles fósiles multiplicaron por 30 la energía disponible."},
+ solar:{group:"Economía",name:"Precio de la energía solar",icon:"Sun",s0:1976,down:true,unit:"$ por vatio de panel",src:"Nemet (2009), IRENA vía Our World in Data (aprox.)",
+  pts:[[1976,106],[1980,32],[1990,8.4],[2000,4.9],[2010,2],[2015,0.6],[2020,0.25],[2023,0.13],[2026,0.1]],
+  fmt:v=>(v>=10?fmtInt(v):v.toFixed(2).replace(".",","))+" $/W",note:"Un panel solar cuesta hoy unas 1.000 veces menos que en 1976. Por eso la solar es ya la energía más barata de la historia."},
+ chips:{group:"Tecnología",name:"Transistores por chip",icon:"Cpu",s0:1971,unit:"transistores",src:"Intel 4004 (1971) → Nvidia B200 (2024)",
+  pts:[[1971,2300],[1978,29000],[1989,1.2e6],[1993,3.1e6],[2000,4.2e7],[2006,2.9e8],[2010,1.17e9],[2016,7.2e9],[2020,5.4e10],[2024,2.08e11],[2026,2.6e11]],
+  fmt:v=>v>=1e6?fmtBig(v):fmtInt(v),note:"La ley de Moore se ha cumplido durante más de 50 años: el número de transistores por chip se duplica aproximadamente cada dos años."},
+ internet:{group:"Tecnología",name:"Usuarios de Internet",icon:"Globe",s0:1990,unit:"personas",src:"UIT (Unión Internacional de Telecomunicaciones)",
+  pts:[[1990,2.6e6],[1995,16e6],[2000,413e6],[2005,1.02e9],[2010,2e9],[2015,3.2e9],[2019,4.1e9],[2021,4.9e9],[2023,5.4e9],[2026,5.9e9]],
+  fmt:v=>fmtInt(v/1e6)+" M",note:"En 1990 había menos usuarios de Internet que habitantes en Madrid. Hoy están conectadas siete de cada diez personas del planeta."},
+ genoma:{group:"Tecnología",name:"Coste de leer un genoma",icon:"Dna",s0:2001,down:true,unit:"dólares por genoma",src:"NHGRI (Instituto Nacional de Investigación del Genoma Humano, EE. UU.), aprox.",
+  pts:[[2001,9.5e7],[2004,2e7],[2007,9e6],[2008,1.4e6],[2009,1e5],[2011,1e4],[2015,1250],[2020,700],[2024,300],[2026,200]],
+  fmt:v=>v>=1e6?fmtBig(v)+" $":fmtInt(v)+" $",note:"El coste cayó mucho más rápido que la ley de Moore: de casi 100 millones de dólares a unos cientos en 25 años."},
+ ia:{group:"Tecnología",name:"Cómputo para entrenar IA",icon:"Brain",s0:2012,unit:"operaciones (FLOP)",src:"Epoch AI (aprox.)",log:true,
+  pts:[[2012,4.7e17],[2014,4e19],[2016,2e21],[2017,3.4e23],[2020,3.1e23],[2023,2e25],[2025,5e26],[2026,1e27]],
+  fmt:v=>fmtSci(v),note:"Del AlexNet de 2012 a los grandes modelos actuales, el cómputo usado para entrenar una IA se ha multiplicado por unos mil millones."}
+};
+function val(ser,y){const p=ser.pts;if(y<=p[0][0])return p[0][1];for(let i=1;i<p.length;i++){if(y<=p[i][0]){const[x0,v0]=p[i-1],[x1,v1]=p[i];const t=(y-x0)/(x1-x0);return Math.exp(Math.log(v0)+(Math.log(v1)-Math.log(v0))*t)}}return p[p.length-1][1]}
+
+const LADDER=[
+ {e:0,name:"Una persona con un ábaco",when:"Antigüedad",c:"#f2a33a",d:"Alrededor de una operación por segundo. Así se calculó durante milenios."},
+ {e:3.7,name:"ENIAC",when:"1946",c:"#ff8a4c",d:"5.000 sumas por segundo con 18.000 válvulas de vacío. Ocupaba una sala entera."},
+ {e:8.2,name:"Cray-1",when:"1976",c:"#ffc26a",d:"160 millones de operaciones por segundo. El superordenador icónico de los 70."},
+ {e:12,name:"ASCI Red / tu móvil actual",when:"1997 → hoy",c:"#7fd8ff",d:"Un billón de operaciones por segundo: el récord mundial de 1997 hoy cabe en el bolsillo."},
+ {e:15,name:"Roadrunner",when:"2008",c:"#5fc4ff",d:"El primer petaflop: mil billones de operaciones por segundo."},
+ {e:16.5,name:"Cerebro humano (estimación)",when:"siempre",c:"#ffb0d0",d:"Las estimaciones van de 10¹⁶ a 10¹⁸ operaciones por segundo… con solo 20 W.",ref:true},
+ {e:18.2,name:"El Capitan / Frontier",when:"2022–2024",c:"#38c8ff",d:"Exaescala: más de un trillón de operaciones por segundo. Los mayores superordenadores de hoy."},
+ {e:21,name:"Zettaescala",when:"~2035",c:"#7fa8ff",d:"Mil veces la exaescala. Objetivo de los grandes laboratorios para la próxima década.",fut:true},
+ {q:true,name:"Computación cuántica",when:"~2030s",c:"#a283ff",d:"No juega en esta escala: no hace más operaciones, sino que resuelve ciertos problemas de otra forma. Factorizar o simular moléculas le cuesta minutos donde un ordenador clásico tardaría más que la edad del universo."},
+ {e:26,name:"Fotónica y neuromórfica a escala planetaria",when:"siglo XXI",c:"#9fe8ff",d:"Calcular con luz y con neuronas artificiales multiplica las operaciones por vatio miles de veces.",fut:true},
+ {e:33,name:"Computronium en la Tierra",when:"siglos",c:"#b0f0ff",d:"Materia reorganizada átomo a átomo para calcular, con energía de fusión.",fut:true},
+ {e:42,name:"Cerebro Matrioshka",when:"milenios",c:"#ffcf6a",d:"Capas de computronium alrededor del Sol, alimentadas por toda su energía (estimación de R. Bradbury).",fut:true},
+ {e:50.7,name:"Límite físico: 1 kg de materia",when:"∞",c:"#ffe2b0",d:"El «portátil definitivo» de Seth Lloyd: 5×10⁵⁰ operaciones por segundo. Para lograrlo, la materia tendría que ser casi un agujero negro.",fut:true}
+];
+function Ladder(){
+  const [open,setOpen]=useState(8);
+  const sup=e=>html`10<sup>${Math.round(e)}</sup>`;
+  return html`<div className="ladder">
+    <div className="stmt">Operaciones por segundo, en escala logarítmica: cada marca multiplica por 10. Toca un peldaño.</div>
+    ${LADDER.map((r,i)=>html`<button key=${i} className="rung" aria-expanded=${open===i?"true":"false"} onClick=${()=>setOpen(open===i?-1:i)}>
+      <span className="ex" style=${{color:r.c}}>${r.q?"≠":sup(r.e)}</span>
+      <span style=${{minWidth:0}}>
+        <span className="t">${r.name}</span> <span style=${{font:"500 11px var(--f-mono)",color:"var(--muted)"}}>· ${r.when}${r.fut?" · proyección":""}</span>
+        ${r.q?html`<div className="bar2" style=${{width:"100%",background:"repeating-linear-gradient(90deg,#a283ff 0 6px,transparent 6px 12px)"}}></div>`
+          :html`<div className="bar2" style=${{width:Math.max(2,r.e/51*100)+"%",background:`linear-gradient(90deg,#f2a33a,${r.c})`,opacity:r.fut?.7:1}}></div>`}
+        ${open===i&&html`<div className="d">${r.d}</div>`}
+      </span>
+    </button>`)}
+  </div>`;
+}
+
+function DataView({onJump}){
+  const [metric,setMetric]=useState("pop");
+  const [from,setFrom]=useState(null);
+  const [logY,setLogY]=useState(false);
+  const [wi,setWi]=useState(4);
+  const [tip,setTip]=useState(null);
+  const ref=useRef(null);const {w}=useSize(ref);
+  const railRef=useRef(null);
+  useEffect(()=>{const el=railRef.current&&railRef.current.querySelector('[aria-pressed="true"]');if(el)try{el.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}},[metric]);
+  const pick=k=>{setMetric(k);setTip(null);setFrom(null);if(SERIES[k])setLogY(!!(SERIES[k].log||(SERIES[k].down&&!SERIES[k].pctDown)));const s=SERIES[k];if(s){const span=NOW-s.s0;setWi(span>3000?4:span>150?3:1)}};
+  const keys=[...Object.keys(SERIES),"ladder"];
+  const rail=html`<div className="mrail" ref=${railRef} role="tablist" aria-label="Indicador">
+      ${keys.map(k=>{const s=SERIES[k];const on=metric===k;return html`<button key=${k} role="tab" aria-pressed=${on?"true":"false"} onClick=${()=>pick(k)}>
+        <span className="mi"><${Ic} n=${s?s.icon:"Gauge"} size=${16}/></span>
+        <span className="mg">${s?s.group:"Tecnología"}</span>
+        <span className="mn">${s?s.name:"Escalera del cómputo"}</span>
+      </button>`})}
+    </div>`;
+  if(metric==="ladder")return html`<div className="data">${rail}<div className="dpanel"><${Ladder}/></div></div>`;
+  const ser=SERIES[metric];
+  const span=NOW-ser.s0;
+  const WIN=[5,10,25,50,75,100,250,500,1000,2000,5000].filter(n=>n<span).concat([span]);
+  const wiC=Math.min(wi,WIN.length-1);const N=WIN[wiC];
+  const FROMS=[null,...[1500,1900,1970,2000,2015].filter(y=>y>ser.s0+(span*0.05)&&y<NOW-8)].slice(0,4);
+  const fromC=FROMS.includes(from)?from:null;
+  const Hh=Math.round(Math.min(340,Math.max(210,w*0.6)));
+  const PL=6,PR=6,PT=26,PB=26,iw=w-PL-PR,ih=Hh-PT-PB;
+  const d0=fromC==null?ser.s0:fromC,d1=NOW;
+  const X=y=>PL+(y-d0)/(d1-d0)*iw;
+  const vs=Array.from({length:240},(_,i)=>val(ser,d0+(d1-d0)*i/239));
+  const vmax=Math.max(...vs),vmin=Math.min(...vs);
+  const Y=v=>logY?PT+ih-(Math.log(v)-Math.log(vmin))/((Math.log(vmax)-Math.log(vmin))||1)*ih:PT+ih-(ser.down?(v-0)/vmax:v/vmax)*ih;
+  const line=vs.map((v,i)=>(i?"L":"M")+X(d0+(d1-d0)*i/239).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
+  const area=line+` L${X(d1)} ${PT+ih} L${X(d0)} ${PT+ih}Z`;
+  const ws=Math.max(d0,NOW-N);
+  const v0=val(ser,ser.s0),vNow=val(ser,NOW),vW=val(ser,NOW-N);
+  const gain=(vNow-vW)/(vNow-v0);
+  const tshare=N/span;
+  const mult=ser.down?v0/vNow:vNow/v0;
+  const hitos=HIST.filter(m=>m.year!=null&&m.year<=NOW&&m.year>=d0);
+  const nT=w<500?3:5,rq=(d1-d0)>2000?1000:(d1-d0)>300?50:(d1-d0)>40?10:5;
+  const ticks=Array.from({length:nT},(_,i)=>i===0?d0:i===nT-1?d1:Math.round((d0+(d1-d0)*i/(nT-1))/rq)*rq);
+  const pct=x=>x>=0.995?"99":x<0.01?(x*100).toFixed(1).replace(".",","):Math.round(x*100);
+  const mfmt=x=>x>=1e6?fmtSci(x):x>=100?fmtInt(x):x.toFixed(1).replace(".",",");const multTxt=mfmt(mult);const wMultTxt=mfmt(vW/vNow);
+  const endLab=ser.fmt(vNow),startLab=ser.fmt(v0);
+  const yEnd=Y(vNow);
+
+  return html`<div className="data">
+    ${rail}
+    <div className="dpanel">
+      <div className="dhead">
+        ${ser.down&&!ser.pctDown?html`<div className="big">÷${wMultTxt}</div>
+        <div className="stmt">En los <b>últimos ${fmtInt(N)} años</b> el ${ser.name.charAt(0).toLowerCase()+ser.name.slice(1)} se ha dividido entre <b>${wMultTxt}</b>.</div>`
+        :html`<div className="big">${pct(gain)}%</div>
+        <div className="stmt">de toda la ${ser.down?"caída":"subida"} de <b>${ser.name.charAt(0).toLowerCase()+ser.name.slice(1)}</b> ocurrió en los <b>últimos ${fmtInt(N)} años</b>, solo el <b>${pct(tshare)} %</b> del periodo.</div>`}
+      </div>
+      <div className="kpis">
+        <div><span>${fmtYear(ser.s0)}</span><b>${startLab}</b></div>
+        <div><span>Hoy</span><b style=${{color:"var(--neon)"}}>${endLab}</b></div>
+        <div><span>${ser.down?"Dividido":"Multiplicado"}</span><b style=${{color:"var(--violet)"}}>${ser.down?"÷":"×"}${multTxt}</b></div>
+      </div>
+      <div className="ctl-block">
+        <div className="srow"><span>Últimos <b style=${{color:"var(--ink)"}}>${fmtInt(N)} años</b></span><span>desde ${fmtYear(NOW-N)}</span></div>
+        <input id="ventana" type="range" min="0" max=${WIN.length-1} step="1" value=${wiC} style=${{"--p":(wiC/(WIN.length-1)*100)+"%"}} aria-label="Ventana de años" onInput=${e=>setWi(+e.target.value)} onChange=${e=>setWi(+e.target.value)}/>
+      </div>
+      <div ref=${ref} style=${{position:"relative"}}>
+        <svg width=${w} height=${Hh} viewBox=${`0 0 ${w} ${Hh}`} style=${{display:"block",maxWidth:"100%"}} role="img" aria-label=${"Gráfico de "+ser.name}>
+          <defs><linearGradient id="dA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#38c8ff" stopOpacity=".35"/><stop offset="1" stopColor="#38c8ff" stopOpacity="0"/></linearGradient>
+          <linearGradient id="dL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#f2a33a"/><stop offset=".7" stopColor="#38c8ff"/><stop offset="1" stopColor="#a283ff"/></linearGradient></defs>
+          ${[0.25,0.5,0.75].map(t=>html`<line key=${t} x1=${PL} x2=${w-PR} y1=${PT+ih*t} y2=${PT+ih*t} stroke="#1b2440" strokeDasharray="2 6"/>`)}
+          <rect x=${X(ws)} y=${PT} width=${Math.max(2,X(d1)-X(ws))} height=${ih} fill="#a283ff" opacity=".14"/>
+          <line x1=${X(ws)} x2=${X(ws)} y1=${PT} y2=${PT+ih} stroke="#a283ff" strokeDasharray="3 4"/>
+          <path d=${area} fill="url(#dA)"/>
+          <path d=${line} fill="none" stroke="url(#dL)" strokeWidth="3" strokeLinejoin="round"/>
+          <circle cx=${X(d1)} cy=${yEnd} r="5" fill="#a283ff"/>
+          <text x=${X(d1)-8} y=${yEnd<PT+30?yEnd+18:yEnd-10} textAnchor="end" fill="#eef3ff" fontSize="12" fontFamily="JetBrains Mono, monospace">${endLab}</text>
+          <line x1=${PL} x2=${w-PR} y1=${PT+ih} y2=${PT+ih} stroke="#24305a"/>
+          ${ticks.map((t,i)=>html`<text key=${i} x=${X(t)} y=${Hh-6} textAnchor=${i===0?"start":i===nT-1?"end":"middle"} fill="#8d9bb8" fontSize="11" fontFamily="JetBrains Mono, monospace">${fmtYear(t)}</text>`)}
+          ${hitos.map(m=>html`<g key=${m.id} style=${{cursor:"pointer"}} onClick=${()=>setTip(m.id===tip?null:m.id)}>
+            <circle cx=${X(m.year)} cy=${PT+ih} r="11" fill="transparent"/>
+            <circle cx=${X(m.year)} cy=${PT+ih} r=${tip===m.id?6:4} fill="#ffb547" stroke="#05070d" strokeWidth="1.5"/></g>`)}
+        </svg>
+        ${tip&&(()=>{const m=HIST.find(x=>x.id===tip);if(!m)return null;const left=Math.min(Math.max(0,X(m.year)-110),w-220);return html`<div className="dtip" style=${{left}}>
+          <div style=${{font:"500 11px var(--f-mono)",color:"#ffb547"}}>${m.label}</div><div style=${{fontWeight:600}}>${m.title}</div>
+          <button onClick=${()=>onJump(m.id)}>Ver en la curva →</button></div>`})()}
+      </div>
+      <div className="dctl">
+        <span className="dl">Periodo</span>
+        <div className="seg sm full" role="group" aria-label="Periodo">
+          ${FROMS.map(y=>html`<button key=${String(y)} aria-pressed=${fromC===y?"true":"false"} onClick=${()=>setFrom(y)}>${y==null?"Todo":(FROMS.length>3?"":"Desde ")+y}</button>`)}
+        </div>
+        <span className="dl">Escala</span>
+        <div className="seg sm full" role="group" aria-label="Escala vertical">
+          <button aria-pressed=${!logY?"true":"false"} onClick=${()=>setLogY(false)}>Lineal</button>
+          <button aria-pressed=${logY?"true":"false"} onClick=${()=>setLogY(true)}>Log</button>
+        </div>
+      </div>
+      <div className="note"><${Ic} n="Lightbulb" size=${16} color="#ffb547"/><span>${ser.note}</span></div>
+      <div className="src">Escala de tiempo real · puntos ámbar: hitos de la curva · Fuente: ${ser.src}</div>
+    </div>
+  </div>`;
+}
+
+/* ───────── App ───────── */
+function App(){
+  const [mode,setMode]=useState("hist");
+  const [overview,setOverview]=useState(true);
+  const [idx,setIdx]=useState(0);
+  const [open,setOpen]=useState(false);
+  const [playing,setPlaying]=useState(false);
+  const future=false;
+  const stops=ALL;
+  const go=useCallback(i=>{setOverview(false);setOpen(false);setIdx(Math.max(0,Math.min(stops.length-1,i)))},[stops]);
+  useEffect(()=>{if(!playing)return;const t=setInterval(()=>{setOverview(false);setOpen(false);setIdx(i=>{if(i>=stops.length-1){setPlaying(false);return i}return i+1})},3400);return()=>clearInterval(t)},[playing,stops]);
+  useEffect(()=>{const f=e=>{if(mode==="data")return;if(e.key==="ArrowRight")go(overview?0:idx+1);if(e.key==="ArrowLeft")go(idx-1)};window.addEventListener("keydown",f);return()=>window.removeEventListener("keydown",f)},[idx,overview,go,mode]);
+  const switchMode=m=>{if(m===mode)return;setMode(m);setPlaying(false);setOpen(false);setIdx(0);setOverview(m==="hist")};
+  const jump=id=>{const i=ALL.findIndex(m=>m.id===id);setMode("hist");setPlaying(false);setOverview(false);setOpen(false);setIdx(i)};
+  const cur=stops[idx];
+  const tag=cur.label;
+
+  return html`<div className="app">
+    <div className="top">
+      <div className="brand">Gráfica de la evolución <b>tecnológica histórica</b></div>
+      <div className="seg" role="group" aria-label="Modo">
+        <button aria-pressed=${mode==="hist"?"true":"false"} onClick=${()=>switchMode("hist")}><${Ic} n="Spline" size=${15}/>La curva</button>
+        <button aria-pressed=${mode==="data"?"true":"false"} onClick=${()=>switchMode("data")}><${Ic} n="LineChart" size=${15}/>Datos</button>
+      </div>
+    </div>
+
+    ${mode==="data"?html`<${DataView} onJump=${jump}/>`:html`
+    <${Stage} stops=${stops} future=${future} idx=${idx} overview=${overview} onPick=${go}/>
+    <div className="hud">
+      ${overview?html`<div className="card enter" key=${"ov"+mode}>
+          <div className="meta"><span className="pill" style=${{background:"var(--amber)"}}>400.000 a.C. → año 10¹⁰⁰</span></div>
+          <div className="title">Plana 400.000 años. Hoy, vertical.</div>
+          <div className="ratecmp"><b style=${{color:"#f2a33a"}}>1 invento cada 132.000 años</b><${Ic} n="ArrowRight" size=${16}/><b style=${{color:"#38c8ff"}}>${rateText(PHASES[5].rate).replace("hitos","inventos")}</b></div>
+        </div>`
+      :html`<div className="card enter" key=${cur.id}>
+          <div className="meta">
+            <span className="pill" style=${{background:cur.c}}>${String(idx+1).padStart(2,"0")} / ${stops.length}</span>
+            <span style=${{color:cur.c}}>${cur.era}</span><span style=${{color:"var(--muted)"}}>· ${tag}</span>
+            ${cur.cat&&html`<span style=${{color:"var(--muted)"}}>· ${CATS[cur.cat].name}</span>`}${cur.fut&&cur.k&&cur.off>=80&&html`<span style=${{color:"var(--muted)"}}>· Kardashev ${cur.k}</span>`}
+          </div>
+          <div className="title">${cur.title}</div>
+          <div className="fact">${cur.fact}</div>
+          ${(cur.st||cur.vida)&&html`<div className="status">${cur.vida&&html`<span className="vida"><${Ic} n="HeartPulse" size=${13}/>${cur.vida}</span>`}${cur.st&&html`<span><b>Hoy:</b> ${cur.st}</span>`}</div>`}
+          ${open?html`<div className="why">${cur.why}</div>`:html`<button className="whybtn" onClick=${()=>setOpen(true)}><${Ic} n="Zap" size=${14} color=${cur.c}/>${cur.cat==="astro"?"¿Por qué importa?":cur.fut?"¿Por qué aceleraría la curva?":"¿Por qué aceleró la curva?"}</button>`}
+        </div>`}
+      <div className="nav">
+        <button className="btn" aria-label="Hito anterior" disabled=${!overview&&idx===0} onClick=${()=>{setPlaying(false);go(overview?0:idx-1)}}><${Ic} n="ChevronLeft" size=${20}/></button>
+        <button className="btn main" onClick=${()=>{if(!playing&&idx>=stops.length-1)setIdx(0);if(!playing){setOverview(false)}setPlaying(p=>!p)}}><${Ic} n=${playing?"Pause":"Play"} size=${17}/>${playing?"Pausa":overview?"Empezar viaje":"Viaje"}</button>
+        <button className="btn" aria-label="Hito siguiente" disabled=${!overview&&idx===stops.length-1} onClick=${()=>{setPlaying(false);go(overview?0:idx+1)}}><${Ic} n="ChevronRight" size=${20}/></button>
+        <button className="btn" aria-label=${overview?"Acercar al hito":"Ver curva completa"} onClick=${()=>{setPlaying(false);setOverview(o=>!o)}}><${Ic} n=${overview?"ZoomIn":"Maximize2"} size=${18}/></button>
+      </div>
+      <${MiniMap} stops=${stops} idx=${idx} overview=${overview} k=${3.6} onPick=${i=>{setPlaying(false);go(i)}}/>
+    </div>`}
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
+
+})();
+</script>
+
+</body>
+</html>
