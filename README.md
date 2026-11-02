@@ -1,6 +1,6 @@
 # Gráfica de la evolución tecnológica histórica
 
-Viaje interactivo por la evolución tecnológica de la humanidad: **130 hitos**, desde el dominio del fuego (c. 400.000 a.C.) hasta el año 10¹⁰⁰.
+Viaje interactivo por la evolución tecnológica de la humanidad: **150 hitos**, desde el dominio del fuego (c. 400.000 a.C.) hasta el año 10¹⁰⁰.
 
 - **La curva**: la altura es el número de inventos acumulados y el eje horizontal es el tiempo, con la misma escala comprimida para pasado y futuro. Plana durante 400.000 años; hoy, vertical.
 - **Viaje animado** con ilustraciones por hito, zoom libre (pellizcar / rueda), minimapa y ritmo de descubrimientos (de 1 invento cada 132.000 años a 8,5 al año).

@@ -186,6 +186,18 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .gb b{font:600 12px var(--f-mono);text-align:right}
 .wtrend{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.5;color:#d6def0}
 .wtrend b{color:var(--ink)}
+.axes{font-size:13px;color:var(--muted);line-height:1.4}
+.axes b{color:var(--ink);font-weight:600}
+.what{display:flex;flex-direction:column;gap:2px}
+.what b{font-family:var(--f-display);font-size:18px;font-weight:700}
+.what span{font-size:13.5px;color:var(--muted);line-height:1.4}
+.bigwrap{display:flex;flex-direction:column;gap:2px}
+.bigsub{font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.legend2{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend2 span{display:inline-flex;align-items:center;gap:6px}
+.legend2 i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.mrail button{min-height:68px}
+.mrail .mn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 button:focus-visible,input:focus-visible,.vig:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
 .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2s ease-out infinite}
 @keyframes pulse{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
@@ -375,7 +387,28 @@ const HIST=[
  H("deep",2012,"2012","Era de los datos","#6aa8ff","#060f2a","Brain","Aprendizaje profundo","Las redes neuronales aprenden a ver: la visión artificial da un salto de golpe.","Las GPU y los datos masivos despiertan una idea de los años 50."),
  H("crispr",2012.5,"2012","Era de los datos","#6ad7d0","#05181f","Scan","CRISPR","Unas tijeras moleculares que editan el ADN con precisión (Nobel 2020).","Editar la vida pasa a ser tan barato como un experimento de laboratorio."),
  H("alphafold",2020,"2020","Era de la IA","#7fb8ff","#060f2a","Sparkles","AlphaFold","La IA predice la forma de casi todas las proteínas conocidas (Nobel 2024).","Medio siglo de problema científico resuelto por una máquina."),
- H("ia",2022,"2022 – hoy","Ahora","#38c8ff","#04112a","ia","IA generativa","Modelos que programan, razonan y escriben con cientos de millones de usuarios.","La primera tecnología que acelera la propia investigación.",{now:true}),
+ H("hubble",1990,"1990","Era digital","#9fb4ff","#070a1c","Telescope","Telescopio Hubble","El primer gran telescopio en órbita, por encima de la atmósfera.","Mide la edad del universo y descubre que su expansión se acelera."),
+ H("dolly",1996,"1996","Era digital","#6ad7d0","#05181f","Dna","La oveja Dolly","Primer mamífero clonado a partir de una célula adulta.","Demuestra que una célula adulta puede reprogramarse: la base de la medicina regenerativa."),
+ H("google",1998,"1998","Era digital","#5fb8ff","#05112a","Search","Buscadores y Google","Encontrar cualquier información pasa a tardar menos de un segundo.","El conocimiento del mundo queda a una búsqueda de distancia."),
+ H("iss",1998.5,"1998","Era digital","#cfd6e6","#070a16","Satellite","Estación Espacial Internacional","Habitada sin interrupción desde el año 2000.","Más de 25 años seguidos con humanos viviendo en el espacio."),
+ H("wikipedia",2001,"2001","Era digital","#cfd6e6","#0a0e1c","BookOpen","Wikipedia","La mayor enciclopedia de la historia, escrita por voluntarios.","Más de 60 millones de artículos gratuitos en más de 300 idiomas."),
+ H("redes",2004,"2004","Era digital","#6aa8ff","#05112a","Share2","Redes sociales","Facebook, luego YouTube y Twitter: cualquiera puede publicar para el mundo.","Miles de millones de personas conectadas en tiempo real."),
+ H("bitcoin",2009,"2009","Era móvil","#ffb547","#1a1206","Bitcoin","Bitcoin y blockchain","Dinero digital que funciona sin bancos centrales.","Primera forma de transferir valor por Internet sin intermediarios."),
+ H("reutilizable",2015,"2015","Era de los datos","#ff8a5c","#1a0a06","Rocket","Cohetes reutilizables","Un cohete Falcon 9 aterriza de pie tras ir al espacio.","El coste de llegar a órbita cae drásticamente: se abre la economía espacial."),
+ H("ondas",2015.5,"2015","Era de los datos","#b0b8ff","#0a0c24","Waves","Ondas gravitacionales","LIGO detecta la colisión de dos agujeros negros, como predijo Einstein (Nobel 2017).","Un nuevo sentido para observar el universo."),
+ H("alphago",2016,"2016","Era de los datos","#7fb8ff","#060f2a","Bot","AlphaGo","Una IA gana al campeón mundial de Go, un juego con más partidas posibles que átomos en el universo.","La IA aprende estrategias que ningún humano había enseñado."),
+ H("transformer",2017,"2017","Era de los datos","#7fb8ff","#060f2a","BrainCircuit","El Transformer","Google publica la arquitectura en la que se basan todos los grandes modelos de lenguaje.","Una sola idea técnica da lugar a la IA generativa."),
+ H("sycamore",2019,"2019","Era de los datos","#7fa8ff","#081030","Atom","Supremacía cuántica","El chip Sycamore de Google hace en minutos un cálculo que un superordenador tardaría miles de años en completar.","Primera prueba de que un ordenador cuántico puede superar a uno clásico."),
+ H("arnm",2020.5,"2020","Era de la IA","#7fe0b0","#071a14","Syringe","Vacunas de ARNm","Vacunas contra la COVID-19 diseñadas en días y aprobadas en menos de un año (Nobel 2023).","Una plataforma que se reprograma para cada enfermedad, incluido el cáncer."),
+ H("webb",2021,"2021","Era de la IA","#ffd08a","#120c04","telescopio","Telescopio James Webb","Ve galaxias formadas apenas 300 millones de años después del Big Bang.","Analiza atmósferas de planetas de otras estrellas."),
+ H("ia",2022,"2022","Era de la IA","#38c8ff","#04112a","ia","ChatGPT e IA generativa","Llega a 100 millones de usuarios en dos meses, la adopción más rápida de la historia.","La primera tecnología que acelera la propia investigación."),
+ H("ignicion",2022.9,"2022","Era de la IA","#ff6ad5","#10041a","fusion","Ignición de fusión","El NIF de EE. UU. obtiene por primera vez más energía de fusión de la que aportan sus láseres.","La prueba científica de que la fusión puede producir energía neta."),
+ H("crisprcura",2023,"2023","Era de la IA","#6ad7d0","#05181f","Dna","Primera terapia CRISPR aprobada","Casgevy cura la anemia falciforme editando el ADN del paciente.","La edición genética pasa del laboratorio a la farmacia."),
+ H("neuralink",2024,"2024","Era de la IA","#c39bff","#100a28","Brain","Primer implante cerebral comercial","Un paciente con tetraplejia mueve un cursor solo con el pensamiento.","Arranca la conexión directa entre cerebro y máquina."),
+ H("willow",2024.9,"2024","Era de la IA","#7fa8ff","#081030","quantum","Chip cuántico Willow","Google demuestra que añadir más qubits reduce los errores en lugar de aumentarlos.","El obstáculo principal de la computación cuántica empieza a caer."),
+ H("razonamiento",2025,"2025","Era de la IA","#5fd0ff","#061430","Bot","IA que razona y actúa","Modelos que resuelven problemas de olimpiada matemática y trabajan como agentes durante horas.","La IA empieza a hacer trabajo intelectual completo, no solo a responder."),
+ H("artemis2",2026,"abril 2026","Era de la IA","#cfd6e6","#070a16","Moon","Artemis II rodea la Luna","Cuatro astronautas viajan alrededor de la Luna, los primeros desde 1972.","El regreso de los humanos al espacio profundo."),
+
  H("hquantum",2034,"~2034","Proyección","#7fa8ff","#081030","quantum","Computación cuántica","Ordenadores que calculan con superposición y entrelazamiento.","Simular moléculas y materiales que ningún superordenador clásico puede.",{fut:true}),
  H("hfusion",2040,"~2040","Proyección","#ff6ad5","#10041a","fusion","Fusión nuclear","Encender un pequeño Sol para producir electricidad.","Energía limpia casi ilimitada para todo lo que viene después.",{fut:true}),
  H("hagi",2046,"~2046","Proyección","#a283ff","#120a2a","agi","AGI","Una IA que iguala a las personas en casi cualquier tarea intelectual.","Millones de copias investigando a la vez.",{fut:true}),
@@ -424,7 +457,7 @@ function bigNum(g){g=Math.round(g);if(g<1e6)return fmtInt(g);if(g<1e9){const v=g
 function yearLabel(y){if(y==null)return"∞";if(y<0)return fmtInt(-y)+" a.C.";if(y<1e5)return fmtInt(y);if(y<1e6)return fmtInt(y);return "año "+bigNum(y)}
 const F=(year,id,cat,vis,conf,title,fact,why,st,vida,k)=>({id:"f-"+id,year,off:year-NOW,cat,...(ART[vis]?{art:vis}:{icon:vis}),c:CATS[cat].c,bg:BG[cat],conf,title,fact,why,st,vida,k});
 const FUT_ALL=[
- F(2026,"hoy","ia","ia","Ahora","Hoy: IA generativa","La IA ya escribe código, diseña chips y acelera laboratorios.","Todo lo que viene se apoya en una investigación que empieza a automatizarse."),
+ F(2026,"hoy","ia","ia","Ahora","Hoy","Estás aquí. La IA ya escribe código, diseña chips y acelera laboratorios.","Todo lo que viene se apoya en una investigación que empieza a automatizarse."),
  // 2027
  F(2027,"agentes","ia","Bot","Probable","Agentes de IA que trabajan solos","Sistemas que completan tareas de días enteros con supervisión mínima.","Cada persona que sabe dirigirlos multiplica lo que produce.","METR mide que la duración de las tareas que completa la IA se duplica cada ~7 meses."),
  F(2027,"traduccion","ia","Languages","Probable","Traducción universal en tiempo real","Hablas en español y te escuchan en japonés, con tu propia voz.","La barrera del idioma, presente desde Babel, empieza a desaparecer."),
@@ -536,7 +569,7 @@ const FUT_ALL=[
   label:p.off===0?"2026 · hoy":p.off<=10?String(p.year):p.year<1e6?`${yearLabel(p.year)} · dentro de ${bigNum(p.off)} años`:`dentro de ${bigNum(p.off)} años`,
   k:p.k||(p.off<=100?((Math.log10(2e13*Math.pow(1.03,p.off))-6)/10).toFixed(2).replace(".",","):null)}));
 const futFor=cat=>cat==="todo"?FUT_ALL:FUT_ALL.filter((p,i)=>i===0||p.cat===cat||p.id==="f-final");
-const ALL=[...HIST.filter(h=>!h.fut),...FUT_ALL.slice(1)];
+const ALL=[...HIST.filter(h=>!h.fut).sort((a,b)=>a.year-b.year),...FUT_ALL];
 const PHASES=[[-400000,-3500,"Prehistoria"],[-3500,1440,"Antigüedad y Edad Media"],[1440,1879,"Renacimiento e Industria"],[1879,1971,"Siglo XX"],[1971,2026,"Era digital"],[2026,2030,"2027–2030"],[2030,2050,"2030–2050"]].map(([a,b,name])=>{
   const idxs=ALL.map((s,i)=>i).filter(i=>{const y=ALL[i].year;return y!=null&&(a===-400000?y>=a:y>a)&&y<=b});
   const cnt=a===-400000?idxs.length-1:idxs.length;return {a,b,name,idxs,rate:cnt/(b-a)}});
@@ -688,6 +721,13 @@ function Stage({stops,future,idx,overview,onPick}){
             <text x=${x} y=${G.base+30+fs*2.1} textAnchor="middle" fill="#6d7d9c" fontSize=${fs} fontFamily="JetBrains Mono, monospace">${t<0?fmtInt(-t)+" a.C.":t}</text></g>`})})()}
           <line x1=${G.pts[0].x-700} x2=${TX(TEND)} y1=${G.base+30} y2=${G.base+30} stroke="#24305a" strokeWidth="1.5" vectorEffect=${ns}/>
           ${G.bi>0&&html`<text x=${G.pts[G.bi].x-(far?14/cam.s:300)} textAnchor="end" y=${(G.pts[G.bi].y+G.pts[G.bi-1].y)/2} fill="#a283ff" fontSize=${far?11/cam.s:16} fontWeight="700" fontFamily="Unbounded, sans-serif">≈ MÁS ALLÁ DE 2100</text>`}
+        </g>
+        <g pointerEvents="none">${(()=>{const ax=G.box.x+(far?6/cam.s:30);const fs=far?11/cam.s:14;const n=stops.length;const ks=[];for(let k=25;k<=n;k+=25)ks.push(k);
+          return html`<line x1=${ax} x2=${ax} y1=${G.pts[0].y} y2=${G.pts[n-1].y} stroke="#24305a" strokeWidth="1.5" vectorEffect=${ns}/>
+          <text x=${ax} y=${G.pts[n-1].y-fs*1.4} fill="#8d9bb8" fontSize=${fs} fontWeight="600" fontFamily="JetBrains Mono, monospace">↑ INVENTOS ACUMULADOS</text>
+          ${ks.map(k=>html`<g key=${"yk"+k}><line x1=${ax} x2=${ax+fs*.8} y1=${G.pts[k-1].y} y2=${G.pts[k-1].y} stroke="#4a5a78" strokeWidth="1.5" vectorEffect=${ns}/>
+            <text x=${ax+fs*1.2} y=${G.pts[k-1].y+fs*.35} fill="#6d7d9c" fontSize=${fs} fontFamily="JetBrains Mono, monospace">${k}</text></g>`)}`})()}
+          <text x=${TX(TEND)} y=${G.base+30+(far?11/cam.s:13)*3.6} textAnchor="end" fill="#8d9bb8" fontSize=${far?11/cam.s:14} fontWeight="600" fontFamily="JetBrains Mono, monospace">TIEMPO →</text>
         </g>
         ${nowI>=0&&html`<g pointerEvents="none">
           <line x1=${G.box.x} x2=${G.box.x+G.box.w} y1=${G.pts[nowI].y} y2=${G.pts[nowI].y} stroke="#38c8ff" strokeOpacity=".5" strokeDasharray="6 8" strokeWidth="2" vectorEffect=${ns}/>
@@ -866,87 +906,104 @@ function WealthView(){
   </div>`;
 }
 
+const DMETA={
+ pop:{short:"Población",mode:"mult",y0:1950,what:"Cuántas personas viven en el planeta."},
+ vida:{short:"Esperanza de vida",mode:"diff",unitD:"años",y0:1900,what:"Cuántos años vive de media una persona al nacer."},
+ pobreza:{short:"Pobreza extrema",mode:"diff",unitD:"puntos",y0:1950,what:"Qué porcentaje de la humanidad vive en pobreza extrema."},
+ alfab:{short:"Alfabetización",mode:"diff",unitD:"puntos",y0:1950,what:"Qué porcentaje de los adultos sabe leer y escribir."},
+ billo:{short:"Milmillonarios",mode:"mult",y0:2000,what:"Cuántas personas tienen más de 1.000 millones de dólares."},
+ billoW:{short:"Fortuna milmillonaria",mode:"mult",y0:2000,what:"La riqueza sumada de todos los milmillonarios del mundo."},
+ pib:{short:"Riqueza mundial",mode:"mult",y0:1900,what:"Todo lo que produce la economía mundial en un año (PIB), descontada la inflación."},
+ energy:{short:"Energía",mode:"mult",y0:1950,what:"Toda la energía primaria que consume la humanidad en un año."},
+ solar:{short:"Precio solar",mode:"mult",y0:2000,what:"Cuánto cuesta un vatio de panel solar."},
+ chips:{short:"Transistores",mode:"mult",y0:2000,what:"Cuántos transistores caben en el chip más avanzado."},
+ internet:{short:"Internet",mode:"mult",y0:2005,what:"Cuántas personas usan Internet."},
+ genoma:{short:"Coste del genoma",mode:"mult",y0:2010,what:"Cuánto cuesta leer el genoma completo de una persona."},
+ ia:{short:"Cómputo de la IA",mode:"mult",y0:2020,what:"Cuántas operaciones hacen falta para entrenar el modelo de IA más grande de cada año."}
+};
 function DataView({onJump}){
   const [metric,setMetric]=useState("pop");
-  const [from,setFrom]=useState(null);
   const [logY,setLogY]=useState(false);
-  const [wi,setWi]=useState(4);
+  const [yr,setYr]=useState(DMETA.pop.y0);
   const [tip,setTip]=useState(null);
   const [w,setW]=useState(360);const roRef=useRef(null);
   const ref=useCallback(el=>{if(roRef.current){roRef.current.disconnect();roRef.current=null}if(el){setW(Math.max(240,el.getBoundingClientRect().width));const ro=new ResizeObserver(e=>setW(Math.max(240,e[0].contentRect.width)));ro.observe(el);roRef.current=ro}},[]);
   const railRef=useRef(null);
   useEffect(()=>{const el=railRef.current&&railRef.current.querySelector('[aria-pressed="true"]');if(el)try{el.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}},[metric]);
-  const pick=k=>{setMetric(k);setTip(null);setFrom(null);if(SERIES[k])setLogY(!!(SERIES[k].log||(SERIES[k].down&&!SERIES[k].pctDown)));const s=SERIES[k];if(s){const span=NOW-s.s0;setWi(span>3000?4:span>150?3:1)}};
-  const SPECIAL={riqueza:{group:"Riqueza",name:"Concentración de la riqueza",icon:"PieChart"},ladder:{group:"Tecnología",name:"Escalera del cómputo",icon:"Gauge"}};
+  const pick=k=>{setMetric(k);setTip(null);const s=SERIES[k];if(s){setLogY(!!(s.log||(s.down&&!s.pctDown)));setYr(DMETA[k].y0)}};
+  const SPECIAL={riqueza:{group:"Riqueza",short:"Reparto de la riqueza",icon:"PieChart"},ladder:{group:"Tecnología",short:"Escalera del cómputo",icon:"Gauge"}};
   const keys=["pop","vida","pobreza","alfab","riqueza","billo","billoW","pib","energy","solar","chips","internet","genoma","ia","ladder"];
   const rail=html`<div className="mrail" ref=${railRef} role="tablist" aria-label="Indicador">
       ${keys.map(k=>{const s=SERIES[k]||SPECIAL[k];const on=metric===k;return html`<button key=${k} role="tab" aria-pressed=${on?"true":"false"} onClick=${()=>pick(k)}>
         <span className="mi"><${Ic} n=${s.icon} size=${16}/></span>
         <span className="mg">${s.group}</span>
-        <span className="mn">${s.name}</span>
+        <span className="mn">${DMETA[k]?DMETA[k].short:s.short}</span>
       </button>`})}
     </div>`;
   if(metric==="riqueza")return html`<div className="data">${rail}<div className="dpanel"><${WealthView}/></div></div>`;
   if(metric==="ladder")return html`<div className="data">${rail}<div className="dpanel"><${Ladder}/></div></div>`;
-  const ser=SERIES[metric];
+  const ser=SERIES[metric],M=DMETA[metric];
   const span=NOW-ser.s0;
-  const WIN=[5,10,25,50,75,100,250,500,1000,2000,5000].filter(n=>n<span).concat([span]);
-  const wiC=Math.min(wi,WIN.length-1);const N=WIN[wiC];
-  const FROMS=[null,...[1500,1900,1970,2000,2015].filter(y=>y>ser.s0+(span*0.05)&&y<NOW-8)].slice(0,4);
-  const fromC=FROMS.includes(from)?from:null;
-  const Hh=Math.round(Math.min(340,Math.max(210,w*0.6)));
+  // Slider en escala logarítmica de "años atrás": más resolución en lo reciente
+  const agoOf=t=>Math.max(1,Math.round(Math.pow(span,1-t/1000)));
+  const tOf=ago=>Math.round((1-Math.log(Math.max(1,ago))/Math.log(span))*1000);
+  const Y0=Math.min(NOW-1,Math.max(ser.s0,yr));const ago=NOW-Y0;
+  const Hh=Math.round(Math.min(320,Math.max(200,w*0.58)));
   const PL=6,PR=6,PT=26,PB=26,iw=w-PL-PR,ih=Hh-PT-PB;
-  const d0=fromC==null?ser.s0:fromC,d1=NOW;
+  const d0=ser.s0,d1=NOW;
   const X=y=>PL+(y-d0)/(d1-d0)*iw;
-  const vs=Array.from({length:240},(_,i)=>val(ser,d0+(d1-d0)*i/239));
+  const vs=Array.from({length:260},(_,i)=>val(ser,d0+(d1-d0)*i/259));
   const vmax=Math.max(...vs),vmin=Math.min(...vs);
-  const Y=v=>logY?PT+ih-(Math.log(v)-Math.log(vmin))/((Math.log(vmax)-Math.log(vmin))||1)*ih:PT+ih-(ser.down?(v-0)/vmax:v/vmax)*ih;
-  const line=vs.map((v,i)=>(i?"L":"M")+X(d0+(d1-d0)*i/239).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
+  const Yv=v=>logY?PT+ih-(Math.log(v)-Math.log(vmin))/((Math.log(vmax)-Math.log(vmin))||1)*ih:PT+ih-v/vmax*ih;
+  const line=vs.map((v,i)=>(i?"L":"M")+X(d0+(d1-d0)*i/259).toFixed(1)+" "+Yv(v).toFixed(1)).join(" ");
   const area=line+` L${X(d1)} ${PT+ih} L${X(d0)} ${PT+ih}Z`;
-  const ws=Math.max(d0,NOW-N);
-  const v0=val(ser,ser.s0),vNow=val(ser,NOW),vW=val(ser,NOW-N);
-  const gain=(vNow-vW)/(vNow-v0);
-  const tshare=N/span;
-  const mult=ser.down?v0/vNow:vNow/v0;
+  const v0=val(ser,ser.s0),vNow=val(ser,NOW),vY=val(ser,Y0);
+  const share=Math.max(0,Math.min(1,(vNow-vY)/(vNow-v0)));
+  const tshare=ago/span;
+  const mfmt=x=>x>=1e6?fmtSci(x):x>=100?fmtInt(x):x>=10?x.toFixed(0):x.toFixed(1).replace(".",",");
+  let big,bigSub;
+  if(M.mode==="diff"){const d=vNow-vY;big=(d>=0?"+":"−")+Math.abs(d).toFixed(Math.abs(d)<10?1:0).replace(".",",");bigSub=M.unitD+" desde "+fmtYear(Y0)}
+  else if(ser.down){big="÷"+mfmt(vY/vNow);bigSub="más barato que en "+fmtYear(Y0)}
+  else{big="×"+mfmt(vNow/vY);bigSub="más que en "+fmtYear(Y0)}
+  const pct=x=>x>=0.995?"99":x<0.01?(x*100).toFixed(1).replace(".",","):Math.round(x*100);
   const hitos=HIST.filter(m=>m.year!=null&&m.year<=NOW&&m.year>=d0);
   const nT=w<500?3:5,rq=(d1-d0)>2000?1000:(d1-d0)>300?50:(d1-d0)>40?10:5;
   const ticks=Array.from({length:nT},(_,i)=>i===0?d0:i===nT-1?d1:Math.round((d0+(d1-d0)*i/(nT-1))/rq)*rq);
-  const pct=x=>x>=0.995?"99":x<0.01?(x*100).toFixed(1).replace(".",","):Math.round(x*100);
-  const mfmt=x=>x>=1e6?fmtSci(x):x>=100?fmtInt(x):x.toFixed(1).replace(".",",");const multTxt=mfmt(mult);const wMultTxt=mfmt(vW/vNow);
-  const endLab=ser.fmt(vNow),startLab=ser.fmt(v0);
-  const yEnd=Y(vNow);
+  const yEnd=Yv(vNow),xS=X(Y0),yS=Yv(vY);
+  const t=tOf(ago);
 
   return html`<div className="data">
     ${rail}
     <div className="dpanel">
+      <div className="what"><b>${ser.name}</b><span>${M.what}</span></div>
       <div className="dhead">
-        ${ser.down&&!ser.pctDown?html`<div className="big">÷${wMultTxt}</div>
-        <div className="stmt">En los <b>últimos ${fmtInt(N)} años</b> el ${ser.name.charAt(0).toLowerCase()+ser.name.slice(1)} se ha dividido entre <b>${wMultTxt}</b>.</div>`
-        :html`<div className="big">${pct(gain)}%</div>
-        <div className="stmt">de toda la ${ser.down?"caída":"subida"} de <b>${ser.name.charAt(0).toLowerCase()+ser.name.slice(1)}</b> ocurrió en los <b>últimos ${fmtInt(N)} años</b>, solo el <b>${pct(tshare)} %</b> del periodo.</div>`}
+        <div className="bigwrap"><div className="big">${big}</div><div className="bigsub">${bigSub}</div></div>
+        ${M.mode==="mult"&&ser.down?html`<div className="stmt">Desde ${fmtYear(ser.s0)} se ha dividido entre <b>${mfmt(v0/vNow)}</b>. Solo desde <b>${fmtYear(Y0)}</b>, entre <b>${mfmt(vY/vNow)}</b>.</div>`:html`<div className="stmt">El <b>${pct(share)} %</b> de todo el cambio desde ${fmtYear(ser.s0)} ha ocurrido después de <b>${fmtYear(Y0)}</b>, en solo el ${pct(tshare)} % del tiempo.</div>`}
       </div>
       <div className="kpis">
-        <div><span>${fmtYear(ser.s0)}</span><b>${startLab}</b></div>
-        <div><span>Hoy</span><b style=${{color:"var(--neon)"}}>${endLab}</b></div>
-        <div><span>${ser.down?"Dividido":"Multiplicado"}</span><b style=${{color:"var(--violet)"}}>${ser.down?"÷":"×"}${multTxt}</b></div>
+        <div><span>${fmtYear(ser.s0)}</span><b>${ser.fmt(v0)}</b></div>
+        <div><span>${fmtYear(Y0)}</span><b style=${{color:"var(--violet)"}}>${ser.fmt(vY)}</b></div>
+        <div><span>Hoy</span><b style=${{color:"var(--neon)"}}>${ser.fmt(vNow)}</b></div>
       </div>
       <div className="ctl-block">
-        <div className="srow"><span>Últimos <b style=${{color:"var(--ink)"}}>${fmtInt(N)} años</b></span><span>desde ${fmtYear(NOW-N)}</span></div>
-        <input id="ventana" type="range" min="0" max=${WIN.length-1} step="1" value=${wiC} style=${{"--p":(wiC/(WIN.length-1)*100)+"%"}} aria-label="Ventana de años" onInput=${e=>setWi(+e.target.value)} onChange=${e=>setWi(+e.target.value)}/>
+        <label htmlFor="anio" className="srow"><span>Compara hoy con el año <b style=${{color:"var(--ink)"}}>${fmtYear(Y0)}</b></span><span>hace ${fmtInt(ago)} ${ago===1?"año":"años"}</span></label>
+        <input id="anio" type="range" min="0" max="1000" step="1" value=${t} style=${{"--p":(t/10)+"%"}} aria-label="Año de comparación" onInput=${e=>setYr(NOW-agoOf(+e.target.value))} onChange=${e=>setYr(NOW-agoOf(+e.target.value))}/>
+        <div className="srow"><span>${fmtYear(ser.s0)}</span><span>${NOW}</span></div>
       </div>
       <div ref=${ref} style=${{position:"relative"}}>
         <svg width=${w} height=${Hh} viewBox=${`0 0 ${w} ${Hh}`} style=${{display:"block",maxWidth:"100%"}} role="img" aria-label=${"Gráfico de "+ser.name}>
           <defs><linearGradient id="dA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#38c8ff" stopOpacity=".35"/><stop offset="1" stopColor="#38c8ff" stopOpacity="0"/></linearGradient>
           <linearGradient id="dL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#f2a33a"/><stop offset=".7" stopColor="#38c8ff"/><stop offset="1" stopColor="#a283ff"/></linearGradient></defs>
-          ${[0.25,0.5,0.75].map(t=>html`<line key=${t} x1=${PL} x2=${w-PR} y1=${PT+ih*t} y2=${PT+ih*t} stroke="#1b2440" strokeDasharray="2 6"/>`)}
-          <rect x=${X(ws)} y=${PT} width=${Math.max(2,X(d1)-X(ws))} height=${ih} fill="#a283ff" opacity=".14"/>
-          <line x1=${X(ws)} x2=${X(ws)} y1=${PT} y2=${PT+ih} stroke="#a283ff" strokeDasharray="3 4"/>
+          ${[0.25,0.5,0.75].map(q=>html`<line key=${q} x1=${PL} x2=${w-PR} y1=${PT+ih*q} y2=${PT+ih*q} stroke="#1b2440" strokeDasharray="2 6"/>`)}
+          <rect x=${xS} y=${PT} width=${Math.max(2,X(d1)-xS)} height=${ih} fill="#a283ff" opacity=".14"/>
+          <line x1=${xS} x2=${xS} y1=${PT} y2=${PT+ih} stroke="#a283ff" strokeDasharray="3 4"/>
           <path d=${area} fill="url(#dA)"/>
           <path d=${line} fill="none" stroke="url(#dL)" strokeWidth="3" strokeLinejoin="round"/>
-          <circle cx=${X(d1)} cy=${yEnd} r="5" fill="#a283ff"/>
-          <text x=${X(d1)-8} y=${yEnd<PT+30?yEnd+18:yEnd-10} textAnchor="end" fill="#eef3ff" fontSize="12" fontFamily="JetBrains Mono, monospace">${endLab}</text>
+          <circle cx=${xS} cy=${yS} r="5" fill="#05070d" stroke="#a283ff" strokeWidth="2.5"/>
+          <circle cx=${X(d1)} cy=${yEnd} r="5" fill="#38c8ff"/>
+          <text x=${X(d1)-8} y=${yEnd<PT+30?yEnd+18:yEnd-10} textAnchor="end" fill="#eef3ff" fontSize="12" fontFamily="JetBrains Mono, monospace">${ser.fmt(vNow)}</text>
           <line x1=${PL} x2=${w-PR} y1=${PT+ih} y2=${PT+ih} stroke="#24305a"/>
-          ${ticks.map((t,i)=>html`<text key=${i} x=${X(t)} y=${Hh-6} textAnchor=${i===0?"start":i===nT-1?"end":"middle"} fill="#8d9bb8" fontSize="11" fontFamily="JetBrains Mono, monospace">${fmtYear(t)}</text>`)}
+          ${ticks.map((tk,i)=>html`<text key=${i} x=${X(tk)} y=${Hh-6} textAnchor=${i===0?"start":i===nT-1?"end":"middle"} fill="#8d9bb8" fontSize="11" fontFamily="JetBrains Mono, monospace">${fmtYear(tk)}</text>`)}
           ${hitos.map(m=>html`<g key=${m.id} style=${{cursor:"pointer"}} onClick=${()=>setTip(m.id===tip?null:m.id)}>
             <circle cx=${X(m.year)} cy=${PT+ih} r="11" fill="transparent"/>
             <circle cx=${X(m.year)} cy=${PT+ih} r=${tip===m.id?6:4} fill="#ffb547" stroke="#05070d" strokeWidth="1.5"/></g>`)}
@@ -955,19 +1012,17 @@ function DataView({onJump}){
           <div style=${{font:"500 11px var(--f-mono)",color:"#ffb547"}}>${m.label}</div><div style=${{fontWeight:600}}>${m.title}</div>
           <button onClick=${()=>onJump(m.id)}>Ver en la curva →</button></div>`})()}
       </div>
+      <div className="legend2"><span><i style=${{background:"#a283ff"}}></i>Tramo comparado</span><span><i style=${{background:"#ffb547",borderRadius:"50%"}}></i>Hitos de la curva (tócalos)</span></div>
       <div className="dctl">
-        <span className="dl">Periodo</span>
-        <div className="seg sm full" role="group" aria-label="Periodo">
-          ${FROMS.map(y=>html`<button key=${String(y)} aria-pressed=${fromC===y?"true":"false"} onClick=${()=>setFrom(y)}>${y==null?"Todo":(FROMS.length>3?"":"Desde ")+y}</button>`)}
-        </div>
         <span className="dl">Escala</span>
         <div className="seg sm full" role="group" aria-label="Escala vertical">
-          <button aria-pressed=${!logY?"true":"false"} onClick=${()=>setLogY(false)}>Lineal</button>
-          <button aria-pressed=${logY?"true":"false"} onClick=${()=>setLogY(true)}>Log</button>
+          <button aria-pressed=${!logY?"true":"false"} onClick=${()=>setLogY(false)}>Normal</button>
+          <button aria-pressed=${logY?"true":"false"} onClick=${()=>setLogY(true)}>Logarítmica</button>
         </div>
       </div>
+      <div className="src" style=${{marginTop:-4}}>${logY?"Logarítmica: subir lo mismo significa multiplicarse por lo mismo. Sirve para ver cambios enormes de un vistazo.":"Normal: la altura es proporcional al valor real."}</div>
       <div className="note"><${Ic} n="Lightbulb" size=${16} color="#ffb547"/><span>${ser.note}</span></div>
-      <div className="src">Escala de tiempo real · puntos ámbar: hitos de la curva · Fuente: ${ser.src}</div>
+      <div className="src">Eje horizontal en años reales. Unidad: ${ser.unit}. Fuente: ${ser.src}.</div>
     </div>
   </div>`;
 }
@@ -1004,6 +1059,7 @@ function App(){
       ${overview?html`<div className="card enter" key=${"ov"+mode}>
           <div className="meta"><span className="pill" style=${{background:"var(--amber)"}}>400.000 a.C. → año 10¹⁰⁰</span></div>
           <div className="title">Plana 400.000 años. Hoy, vertical.</div>
+          <div className="axes">Cada punto es un invento. <b>Altura</b>: inventos acumulados. <b>Horizontal</b>: el tiempo, en años.</div>
           <div className="ratecmp"><b style=${{color:"#f2a33a"}}>1 invento cada 132.000 años</b><${Ic} n="ArrowRight" size=${16}/><b style=${{color:"#38c8ff"}}>${rateText(PHASES[5].rate).replace("hitos","inventos")}</b></div>
         </div>`
       :html`<div className="card enter" key=${cur.id}>
