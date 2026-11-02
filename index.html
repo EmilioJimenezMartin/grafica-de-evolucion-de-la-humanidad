@@ -157,6 +157,35 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .src{font-size:11.5px;color:var(--muted);line-height:1.45}
 .dtip{position:absolute;top:24px;width:220px;background:#0b1020;border:1px solid #ffb547;border-radius:12px;padding:8px 10px;font-size:13px}
 .dtip button{margin-top:4px;background:none;border:0;padding:0;color:var(--neon);font:600 12.5px var(--f-body);cursor:pointer}
+.wv{display:flex;flex-direction:column;gap:14px}
+.whero{display:flex;gap:6px 16px;align-items:flex-end;flex-wrap:wrap}
+.whero .stmt{flex:1 1 220px;min-width:0}
+.wgrids{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.wlab{font:500 10px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.wgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.wgrid span{aspect-ratio:1;cursor:pointer;transition:background .3s,box-shadow .3s}
+.wgrid .wp{border-radius:50% 50% 30% 30%}
+.wgrid .wc{border-radius:50%}
+.wlegend{display:grid;grid-template-columns:1fr;gap:6px}
+.wlegend button{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:500 13.5px var(--f-body);cursor:pointer}
+.wlegend button[aria-pressed="true"]{border-color:var(--neon);background:color-mix(in srgb,var(--neon) 8%,var(--card))}
+.wlegend i{width:12px;height:12px;border-radius:50%}
+.wlegend b{font:500 11.5px var(--f-mono);color:var(--muted);white-space:nowrap}
+.wfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:8px}
+.wfacts div{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.wfacts b{font-family:var(--f-display);font-size:20px;font-weight:700}
+.wfacts span{font-size:13px;line-height:1.45;color:#c9d3e8}
+.wsec{display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.wst{font-family:var(--f-display);font-weight:700;font-size:17px}
+.wsub{font-size:12.5px;color:var(--muted);line-height:1.45}
+.gbars{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.gb{display:grid;grid-template-columns:118px minmax(0,1fr) 48px;gap:8px;align-items:center;font-size:12.5px}
+.gb span{color:#c9d3e8}
+.gb div{height:10px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden}
+.gb i{display:block;height:100%;border-radius:6px}
+.gb b{font:600 12px var(--f-mono);text-align:right}
+.wtrend{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.5;color:#d6def0}
+.wtrend b{color:var(--ink)}
 button:focus-visible,input:focus-visible,.vig:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
 .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2s ease-out infinite}
 @keyframes pulse{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
@@ -717,6 +746,12 @@ const SERIES={
  alfab:{group:"Humanidad",name:"Alfabetización",icon:"BookOpen",s0:1820,unit:"% de adultos",src:"van Zanden et al., UNESCO vía Our World in Data (aprox.)",
   pts:[[1820,12],[1870,19],[1900,21],[1930,33],[1950,42],[1970,63],[1990,76],[2000,82],[2016,86],[2026,88]],
   fmt:v=>Math.round(v)+" %",note:"En 1820 solo una de cada ocho personas adultas sabía leer. Hoy lo hacen casi nueve de cada diez."},
+ billo:{group:"Riqueza",name:"Milmillonarios",icon:"Crown",s0:1987,unit:"personas",src:"Forbes, The World's Billionaires (1987–2026)",
+  pts:[[1987,140],[2000,470],[2005,691],[2010,1011],[2015,1826],[2020,2095],[2021,2755],[2022,2668],[2023,2640],[2024,2781],[2025,3028],[2026,3428]],
+  fmt:v=>fmtInt(v),note:"En 1987 Forbes contó 140 milmillonarios. En 2026 son 3.428: solo en el último año se sumaron 400."},
+ billoW:{group:"Riqueza",name:"Fortuna de los milmillonarios",icon:"Landmark",s0:1987,unit:"billones de dólares",src:"Forbes, The World's Billionaires (1987–2026)",
+  pts:[[1987,0.295],[2000,0.898],[2005,2.2],[2010,3.6],[2015,7.1],[2020,8],[2021,13.1],[2022,12.7],[2023,12.2],[2024,14.2],[2025,16.1],[2026,20.1]],
+  fmt:v=>(v>=10?v.toFixed(1):v.toFixed(2)).replace(".",",")+" billones $",note:"Desde el año 2000 su fortuna conjunta se ha multiplicado por 22. En ese tiempo el PIB mundial se ha multiplicado por unas 3,5: su porción del pastel no deja de crecer."},
  pib:{group:"Economía",name:"Riqueza mundial",icon:"Coins",s0:1,unit:"PIB, billones de $ int. de 2011",src:"Maddison Project vía Our World in Data (aprox.)",
   pts:[[1,0.18],[1000,0.21],[1500,0.43],[1700,0.64],[1820,1.2],[1870,1.9],[1913,4],[1950,9.3],[1973,27],[2000,63],[2010,88],[2019,125],[2026,145]],
   fmt:v=>(v>=10?fmtInt(v):v.toFixed(1).replace(".",","))+" billones $",note:"Durante 1.800 años la economía mundial apenas se movió. Hoy produce en un año más que la humanidad entera entre el año 1 y 1900."},
@@ -773,24 +808,85 @@ function Ladder(){
   </div>`;
 }
 
+/* ───────── Concentración de la riqueza ───────── */
+const WGROUPS=[
+ {id:"b50",name:"El 50 % más pobre",people:50,wealth:2,c:"#5b6b8a",who:"unos 2.800 millones de adultos"},
+ {id:"m40",name:"El 40 % siguiente",people:40,wealth:23,c:"#38c8ff",who:"unos 2.200 millones de adultos"},
+ {id:"t9",name:"Del 10 % al 1 % más rico",people:9,wealth:38,c:"#a283ff",who:"unos 500 millones de adultos"},
+ {id:"t1",name:"El 1 % más rico",people:1,wealth:37,c:"#ffb547",who:"unos 56 millones de adultos"}
+];
+const WGROWTH=[["50 % más pobre",3.7],["40 % del medio",3.8],["10 % más rico",3.0],["1 % más rico",3.2],["0,01 % más rico",5.0,"> 5"],["0,001 % más rico",5.9],["0,00001 % más rico",8.1],["0,000001 % más rico",9.3]];
+function Grid({cells,sel,setSel,kind}){
+  return html`<div className="wgrid" role="img" aria-label=${kind==="p"?"100 personas":"100 monedas de riqueza"}>
+    ${cells.map((g,i)=>{const G=WGROUPS[g];const on=sel==null||sel===g;return html`<span key=${i} className=${kind==="p"?"wp":"wc"} onClick=${()=>setSel(sel===g?null:g)}
+      style=${{background:on?G.c:"rgba(255,255,255,.07)",boxShadow:on&&sel===g?`0 0 8px ${G.c}`:"none"}}></span>`})}
+  </div>`;
+}
+function WealthView(){
+  const [sel,setSel]=useState(3);
+  const people=[];WGROUPS.forEach((g,i)=>{for(let k=0;k<g.people;k++)people.push(i)});
+  const coins=[];WGROUPS.forEach((g,i)=>{for(let k=0;k<g.wealth;k++)coins.push(i)});
+  const G=sel==null?null:WGROUPS[sel];
+  const maxG=9.3;
+  return html`<div className="wv">
+    <div className="whero">
+      <div className="big" style=${{background:"none",WebkitTextFillColor:G?G.c:"var(--ink)",color:G?G.c:"var(--ink)"}}>${G?G.wealth+" %":"100 %"}</div>
+      <div className="stmt">${G?html`de toda la riqueza del mundo está en manos de <b>${G.name.charAt(0).toLowerCase()+G.name.slice(1)}</b>: ${G.who}.`:html`Si el mundo fuesen <b>100 personas</b> y su riqueza <b>100 monedas</b>, así se repartirían.`}</div>
+    </div>
+    <div className="wgrids">
+      <div><div className="wlab">100 personas</div><${Grid} cells=${people} sel=${sel} setSel=${setSel} kind="p"/></div>
+      <div><div className="wlab">100 monedas de riqueza</div><${Grid} cells=${coins} sel=${sel} setSel=${setSel} kind="c"/></div>
+    </div>
+    <div className="wlegend" role="group" aria-label="Grupos">
+      ${WGROUPS.map((g,i)=>html`<button key=${g.id} aria-pressed=${sel===i?"true":"false"} onClick=${()=>setSel(sel===i?null:i)}>
+        <i style=${{background:g.c}}></i><span>${g.name}</span><b>${g.people} pers. → ${g.wealth} mon.</b></button>`)}
+    </div>
+    <div className="wfacts">
+      <div><b style=${{color:"#ffb547"}}>> 6 %</b><span>de la riqueza mundial la tiene el 0,001 % más rico: menos de 60.000 personas, el triple que la mitad más pobre de la humanidad.</span></div>
+      <div><b style=${{color:"#a283ff"}}>839.000 M $</b><span>es la fortuna de la persona más rica del mundo en 2026, Elon Musk (Forbes).</span></div>
+      <div><b style=${{color:"#38c8ff"}}>41 %</b><span>de los adultos del mundo tiene menos de 10.000 $ de patrimonio. Solo el 1,5 % es millonario (UBS, 2025).</span></div>
+    </div>
+    <div className="wsec">
+      <div className="wst">¿Quién se enriquece más rápido?</div>
+      <div className="wsub">Crecimiento medio anual de la riqueza por adulto, 1995–2021</div>
+      <div className="gbars">${WGROWTH.map(([n,v,t],i)=>html`<div className="gb" key=${n}><span>${n}</span><div><i style=${{width:(v/maxG*100)+"%",background:i>=4?"#ffb547":"#38c8ff"}}></i></div><b>${t||String(v).replace(".",",")} %</b></div>`)}</div>
+      <div className="wsub" style=${{marginTop:6}}>La base y la clase media crecieron algo más deprisa que el 10 % más rico. La gran diferencia está en la cúspide: las mayores fortunas crecen entre el 6 y el 9 % al año.</div>
+    </div>
+    <div className="wsec">
+      <div className="wst">Hacia dónde vamos</div>
+      <ol className="wtrend">
+        <li><b>1995 → 2025:</b> el 0,001 % más rico pasa del 4 % a más del 6 % de la riqueza mundial.</li>
+        <li><b>Milmillonarios:</b> de 140 en 1987 a 3.428 en 2026, con 20,1 billones de dólares (Forbes). Mira su curva en las tarjetas «Milmillonarios».</li>
+        <li><b>~2035:</b> Oxfam calcula que podría haber cinco personas con más de un billón de dólares en una década.</li>
+        <li><b>2070:</b> si la tendencia continúa, el 0,1 % más rico superaría el 25 % de la riqueza mundial (World Inequality Report 2022).</li>
+      </ol>
+    </div>
+    <div className="note"><${Ic} n="Lightbulb" size=${16} color="#ffb547"/><span>Las dos cosas son ciertas a la vez: la pobreza extrema nunca había sido tan baja y la riqueza nunca había estado tan concentrada en la cúspide. Alrededor del 36 % de la fortuna de los milmillonarios es heredada (Oxfam).</span></div>
+    <div className="src">Fuentes: World Inequality Report 2026 y 2022 (World Inequality Lab), Forbes World's Billionaires 2026, UBS Global Wealth Report 2025, Oxfam (2025). Repartos de 2025, en paridad de poder adquisitivo.</div>
+  </div>`;
+}
+
 function DataView({onJump}){
   const [metric,setMetric]=useState("pop");
   const [from,setFrom]=useState(null);
   const [logY,setLogY]=useState(false);
   const [wi,setWi]=useState(4);
   const [tip,setTip]=useState(null);
-  const ref=useRef(null);const {w}=useSize(ref);
+  const [w,setW]=useState(360);const roRef=useRef(null);
+  const ref=useCallback(el=>{if(roRef.current){roRef.current.disconnect();roRef.current=null}if(el){setW(Math.max(240,el.getBoundingClientRect().width));const ro=new ResizeObserver(e=>setW(Math.max(240,e[0].contentRect.width)));ro.observe(el);roRef.current=ro}},[]);
   const railRef=useRef(null);
   useEffect(()=>{const el=railRef.current&&railRef.current.querySelector('[aria-pressed="true"]');if(el)try{el.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"})}catch(e){}},[metric]);
   const pick=k=>{setMetric(k);setTip(null);setFrom(null);if(SERIES[k])setLogY(!!(SERIES[k].log||(SERIES[k].down&&!SERIES[k].pctDown)));const s=SERIES[k];if(s){const span=NOW-s.s0;setWi(span>3000?4:span>150?3:1)}};
-  const keys=[...Object.keys(SERIES),"ladder"];
+  const SPECIAL={riqueza:{group:"Riqueza",name:"Concentración de la riqueza",icon:"PieChart"},ladder:{group:"Tecnología",name:"Escalera del cómputo",icon:"Gauge"}};
+  const keys=["pop","vida","pobreza","alfab","riqueza","billo","billoW","pib","energy","solar","chips","internet","genoma","ia","ladder"];
   const rail=html`<div className="mrail" ref=${railRef} role="tablist" aria-label="Indicador">
-      ${keys.map(k=>{const s=SERIES[k];const on=metric===k;return html`<button key=${k} role="tab" aria-pressed=${on?"true":"false"} onClick=${()=>pick(k)}>
-        <span className="mi"><${Ic} n=${s?s.icon:"Gauge"} size=${16}/></span>
-        <span className="mg">${s?s.group:"Tecnología"}</span>
-        <span className="mn">${s?s.name:"Escalera del cómputo"}</span>
+      ${keys.map(k=>{const s=SERIES[k]||SPECIAL[k];const on=metric===k;return html`<button key=${k} role="tab" aria-pressed=${on?"true":"false"} onClick=${()=>pick(k)}>
+        <span className="mi"><${Ic} n=${s.icon} size=${16}/></span>
+        <span className="mg">${s.group}</span>
+        <span className="mn">${s.name}</span>
       </button>`})}
     </div>`;
+  if(metric==="riqueza")return html`<div className="data">${rail}<div className="dpanel"><${WealthView}/></div></div>`;
   if(metric==="ladder")return html`<div className="data">${rail}<div className="dpanel"><${Ladder}/></div></div>`;
   const ser=SERIES[metric];
   const span=NOW-ser.s0;
