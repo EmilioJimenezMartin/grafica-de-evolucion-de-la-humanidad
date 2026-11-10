@@ -198,6 +198,94 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .legend2 i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .mrail button{min-height:68px}
 .mrail .mn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.retos{gap:18px}
+.rnav{flex:0 0 auto;position:sticky;top:0;z-index:5;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px 0;background:var(--bg)}
+.rnav::-webkit-scrollbar{display:none}
+.rnav button{flex:0 0 auto;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 12.5px var(--f-body);cursor:pointer}
+.rsec{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;padding:16px;border-radius:20px;border:1px solid var(--line);background:radial-gradient(120% 80% at 80% 0%,#120a1a,#05070d 70%)}
+.rk{font:500 10.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:#ff7a8a}
+.rh{font-family:var(--f-display);font-weight:800;font-size:clamp(20px,5.4vw,28px);line-height:1.12;margin:0;text-wrap:balance}
+.rbig{font-family:var(--f-display);font-weight:800;font-size:clamp(26px,7.4vw,40px);line-height:1;font-variant-numeric:tabular-nums}
+.rp{font-size:14px;line-height:1.5;color:#c9d3e8;margin:0}
+.clockwrap{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;align-items:center}
+@media (min-width:640px){.clockwrap{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.clock{width:100%;max-width:340px;margin:0 auto;display:block}
+.clocktxt{display:flex;flex-direction:column;gap:6px}
+.gapc{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:rgba(255,255,255,.025);border:1px solid var(--line)}
+.gt{display:flex;align-items:center;gap:10px}
+.gt b{font-family:var(--f-display);font-size:16px;font-weight:700;line-height:1.2}
+.gn{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#ff3a4a;color:#05070d;font:700 14px var(--f-mono)}
+.rchart{width:100%;display:block}
+.lags{display:flex;flex-direction:column;gap:9px}
+.lag{display:flex;flex-direction:column;gap:4px}
+.ln{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:12.5px}
+.ln b{font-weight:600;white-space:nowrap}.ln span{color:var(--muted);text-align:right;min-width:0}
+.lt{position:relative;height:10px;border-radius:6px;background:rgba(255,255,255,.05)}
+.lt i{position:absolute;top:0;height:10px}
+.lb{background:#ffb547;border-radius:6px}
+.lb.open{background:repeating-linear-gradient(90deg,#ff5a5a 0 4px,transparent 4px 7px)}
+.ld{width:10px;margin-left:-5px;border-radius:50%;background:#38c8ff;z-index:1}
+.le{width:3px;margin-left:-1.5px;background:#eef3ff;z-index:1}
+.laxis{display:flex;justify-content:space-between;font:500 10px var(--f-mono);color:var(--muted)}
+.laxis span:nth-child(2){margin-left:15%}
+.ovs{display:flex;flex-direction:column;gap:5px}
+.ovm{display:grid;grid-template-columns:42px repeat(12,1fr);font:500 9.5px var(--f-mono);color:var(--muted)}
+.ovm span:first-child{grid-column:2}
+.ovr{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:0}
+.ovy{font:500 11px var(--f-mono);color:#c9d3e8}
+.ovb{display:flex;height:12px;border-radius:6px;overflow:hidden}
+.ovb i{background:#4caf6a;transition:width .8s}
+.ovb b{background:#ff3a4a}
+.dice{display:flex;gap:14px;align-items:center}
+.die{flex:0 0 72px;width:72px;height:72px;animation:roll 3s ease-in-out infinite alternate}
+@keyframes roll{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+.risks{display:flex;flex-direction:column;gap:8px}
+.risk{border-radius:16px;border:1px solid var(--line);background:var(--card);overflow:hidden;transition:border-color .3s}
+.risk.on{border-color:var(--rc)}
+.rhead{width:100%;display:grid;grid-template-columns:64px minmax(0,1fr) 20px;gap:12px;align-items:center;padding:8px 12px 8px 8px;background:none;border:0;color:var(--ink);text-align:left;cursor:pointer}
+.rthumb{width:64px;height:48px;border-radius:10px;overflow:hidden;display:block}
+.rart{width:100%;height:100%;display:block}
+.rtt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rtt b{font-size:14px;font-weight:600;line-height:1.25}
+.rtt em{font:500 11px var(--f-mono);font-style:normal;color:var(--rc)}
+.rprob{height:5px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.rprob i{display:block;height:100%;background:var(--rc);border-radius:4px}
+.rbody{display:flex;flex-direction:column;gap:12px;padding:0 12px 14px;animation:enter .4s ease both}
+.rbody .rart{border-radius:12px;height:150px;width:100%}
+.rbody p{margin:0;font-size:14.5px;line-height:1.5;color:#d6def0}
+.rnums{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
+.rnums div{display:flex;flex-direction:column;gap:3px;padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.rnums b{font-family:var(--f-display);font-size:18px;font-weight:700;color:var(--rc)}
+.rnums span{font-size:12.5px;line-height:1.4;color:#c9d3e8}
+.rxp{font-size:12.5px;line-height:1.45;color:var(--muted)}
+.rxp b{color:var(--ink);font-weight:600}
+.rstop{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;line-height:1.45;color:#c9e8d8;padding:10px;border-radius:12px;background:rgba(127,224,176,.07);border:1px solid rgba(127,224,176,.22)}
+.rstop svg{flex:0 0 auto;margin-top:2px;color:#7fe0b0}
+.pbw{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:center}
+@media (min-width:640px){.pbw{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.pb{width:100%;max-width:300px;margin:0 auto;display:block}
+.pbt{display:flex;flex-direction:column;gap:8px}
+.pbsel{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:12px;border:1px solid;background:rgba(255,255,255,.03)}
+.pbsel b{font-size:15px}.pbsel span{font-size:13px;color:#c9d3e8}.pbsel em{font:600 11px var(--f-mono);font-style:normal;text-transform:uppercase;letter-spacing:.08em}
+.qtree{display:flex;flex-direction:column;gap:10px}
+.qroot{position:relative;border-radius:14px;overflow:hidden}
+.qroot .rart{height:120px}
+.qrl{position:absolute;left:10px;bottom:8px;font:600 11px var(--f-mono);color:#fff;background:rgba(5,7,13,.75);padding:4px 8px;border-radius:6px}
+.qbr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.qbr button{padding:9px 6px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);font:600 12px/1.25 var(--f-body);cursor:pointer}
+.qbr button[aria-pressed="true"]{border-color:var(--qc);color:var(--ink);background:color-mix(in srgb,var(--qc) 12%,var(--card))}
+.qitems{display:flex;flex-direction:column;gap:8px;padding-left:12px;border-left:3px solid var(--qc);animation:enter .4s ease both}
+.qit{display:flex;flex-direction:column;gap:3px}
+.qit b{font-size:14.5px;color:var(--qc)}
+.qit span{font-size:13.5px;line-height:1.5;color:#c9d3e8}
+.fork{display:flex;flex-direction:column;gap:10px}
+.forksvg{width:100%;max-width:360px;margin:0 auto;display:block}
+.fcols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fc{display:flex;flex-direction:column;gap:4px;padding:12px;border-radius:12px;border:1px solid}
+.fc b{font-family:var(--f-display);font-size:14px}
+.fc span{font-size:12.5px;line-height:1.45;color:#c9d3e8}
+.fc.bad{border-color:rgba(255,58,74,.5);background:rgba(255,58,74,.06)}.fc.bad b{color:#ff7a8a}
+.fc.good{border-color:rgba(127,224,176,.5);background:rgba(127,224,176,.06)}.fc.good b{color:#7fe0b0}
 button:focus-visible,input:focus-visible,.vig:focus-visible{outline:2px solid var(--neon);outline-offset:2px}
 .pulse{transform-box:fill-box;transform-origin:center;animation:pulse 2s ease-out infinite}
 @keyframes pulse{from{transform:scale(1);opacity:.8}to{transform:scale(3);opacity:0}}
@@ -1027,6 +1115,288 @@ function DataView({onJump}){
   </div>`;
 }
 
+/* ───────── Retos: ilustraciones ───────── */
+ART.virus=`<rect width="240" height="130" fill="#140818"/>
+<circle class="a-glow" cx="120" cy="65" r="56" fill="#ff5a8a" opacity=".16"/>
+${rng(14,i=>{const a=i/14*Math.PI*2,x1=120+Math.cos(a)*30,y1=65+Math.sin(a)*30,x2=120+Math.cos(a)*44,y2=65+Math.sin(a)*44;return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#ff7fa8" stroke-width="3"/><circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="5" fill="#ff5a8a"/>`})}
+<circle cx="120" cy="65" r="31" fill="#c2306a"/><circle cx="110" cy="56" r="7" fill="#e0508a" opacity=".7"/><circle cx="131" cy="74" r="5" fill="#e0508a" opacity=".7"/>
+<g class="a-float"><circle cx="40" cy="30" r="9" fill="#c2306a" opacity=".6"/><circle cx="205" cy="100" r="12" fill="#c2306a" opacity=".5"/><circle cx="200" cy="26" r="6" fill="#c2306a" opacity=".5"/></g>`;
+ART.clima=`<rect width="240" height="130" fill="#1e0a04"/>
+<circle class="a-glow" cx="120" cy="70" r="62" fill="#ff6a2a" opacity=".22"/>
+<circle cx="120" cy="70" r="44" fill="#2f6fd0"/><path d="M92 52 q14 -10 26 0 q8 10 -4 18 q-14 4 -22 -6z M128 74 q16 -6 22 6 q-4 16 -20 14 q-8 -8 -2 -20z" fill="#8a6a2a"/>
+<path d="M76 70 a44 44 0 0 0 88 0" fill="#ff6a2a" opacity=".35"/>
+${rng(5,i=>`<path class="a-flick" style="animation-delay:${i*0.15}s" d="M${88+i*16} 30 q-6 -12 0 -22 q6 10 0 22z" fill="#ffb347"/>`)}
+<rect x="196" y="22" width="10" height="70" rx="5" fill="#f2f4fb"/><rect x="198" y="40" width="6" height="50" fill="#ff4a2a"/><circle cx="201" cy="98" r="10" fill="#ff4a2a"/>`;
+ART.bio=`<rect width="240" height="130" fill="#0a1408"/>
+<path d="M0 100 Q60 88 120 98 T240 94 V130 H0Z" fill="#2a2210"/>
+${rng(7,i=>{const x=20+i*32,h=40+(i%3)*12,alive=i<2;return `<rect x="${x+6}" y="${100-h*0.5}" width="5" height="${h*0.5}" fill="#3a2a18"/><circle cx="${x+8}" cy="${100-h*0.6}" r="${alive?16:12}" fill="${alive?'#4caf6a':'#5a4a30'}" opacity="${alive?1:.7}"/>`})}
+<g class="a-float"><path d="M150 40 q8 -8 16 0 q-8 6 -16 0z M176 30 q6 -6 12 0 q-6 5 -12 0z" fill="#cfd6e6" opacity=".5"/></g>
+<text x="12" y="22" fill="#8fd88a" font-family="JetBrains Mono,monospace" font-size="12">−73 % fauna desde 1970</text>`;
+ART.bacteria=`<rect width="240" height="130" fill="#08141a"/>
+<circle cx="120" cy="65" r="58" fill="none" stroke="#6ad7d0" stroke-width="2" opacity=".5"/>
+${rng(9,i=>{const x=60+(i*37)%120,y=30+(i*23)%70,r=(i*29)%180;return `<g transform="rotate(${r} ${x} ${y})"><rect x="${x-14}" y="${y-6}" width="28" height="12" rx="6" fill="${i%3?'#4fb38a':'#c8f06a'}"/><line x1="${x+14}" y1="${y}" x2="${x+22}" y2="${y+4}" stroke="#4fb38a" stroke-width="1.5"/></g>`})}
+<g class="a-float"><rect x="186" y="16" width="34" height="14" rx="7" fill="#f2f4fb"/><rect x="186" y="16" width="17" height="14" rx="7" fill="#ff5a5a"/><line x1="182" y1="12" x2="224" y2="34" stroke="#ff5a5a" stroke-width="3"/></g>`;
+ART.desinfo=`<rect width="240" height="130" fill="#0c0a1a"/>
+${rng(3,i=>`<g transform="translate(${18+i*74} 26)"><rect width="62" height="80" rx="8" fill="#1a1838" stroke="#3a3870"/><circle cx="31" cy="30" r="14" fill="${['#ffb547','#38c8ff','#ff5a8a'][i]}" opacity=".85"/><rect x="10" y="52" width="42" height="5" rx="2" fill="#5a5890"/><rect x="10" y="62" width="30" height="5" rx="2" fill="#5a5890"/></g>`)}
+<g class="a-float"><path d="M100 16 h40 v12 h-40z" fill="#ff5a5a"/><text x="120" y="25.5" text-anchor="middle" fill="#fff" font-family="JetBrains Mono,monospace" font-size="8" font-weight="700">¿REAL?</text></g>`;
+ART.asteroide=`<rect width="240" height="130" fill="#05050f"/>${stars(28,71)}
+<circle cx="60" cy="110" r="70" fill="#2f6fd0"/><path d="M10 96 q30 -20 60 -6 q20 10 50 0" fill="none" stroke="#4caf6a" stroke-width="10" opacity=".7"/>
+<g class="a-float"><path d="M150 50 L230 10" stroke="#ffb347" stroke-width="10" opacity=".25" stroke-linecap="round"/><path d="M150 50 L220 16" stroke="#ffe0a0" stroke-width="4" opacity=".5" stroke-linecap="round"/>
+<circle cx="150" cy="50" r="13" fill="#8a7a6a"/><circle cx="146" cy="46" r="3" fill="#5a4a3a"/><circle cx="155" cy="54" r="2.5" fill="#5a4a3a"/></g>`;
+ART.volcan=`<rect width="240" height="130" fill="#1a0a06"/>
+${rng(6,i=>`<circle class="a-rise" style="animation-delay:${i*0.5}s" cx="${108+i*5}" cy="${30-i*3}" r="${10+i*3}" fill="#5a4a4a" opacity=".55"/>`)}
+<path d="M30 130 L100 46 H140 L210 130Z" fill="#4a2a1a"/><path d="M100 46 L112 60 L120 50 L128 62 L140 46Z" fill="#ff6a2a"/>
+<path class="a-glow" d="M112 60 L104 90 L116 84 L120 110 L126 80 L134 88 L128 62Z" fill="#ff8a3a"/>`;
+ART.tormenta=`<rect width="240" height="130" fill="#0a0612"/>${stars(18,81)}
+<circle class="a-glow" cx="30" cy="65" r="60" fill="#ffb347" opacity=".4"/><circle cx="0" cy="65" r="56" fill="#ffd56a"/>
+${rng(5,i=>`<path class="a-glow" style="animation-delay:${i*0.3}s" d="M56 ${40+i*12} Q120 ${30+i*15} 170 ${55+i*5}" fill="none" stroke="#ff8a3d" stroke-width="2" opacity=".6"/>`)}
+<circle cx="196" cy="65" r="22" fill="#2f6fd0"/><path d="M174 65 a22 22 0 0 1 44 0" fill="none" stroke="#7fe0b0" stroke-width="4" opacity=".8"/>
+<path d="M222 40 l-6 12 h6 l-6 12" stroke="#ffd56a" stroke-width="2.5" fill="none"/>`;
+ART.basura=`<rect width="240" height="130" fill="#05070f"/>${stars(20,91)}
+<circle cx="120" cy="130" r="80" fill="#2f6fd0"/><circle cx="120" cy="130" r="80" fill="none" stroke="#9fe0ff" stroke-width="2" opacity=".4"/>
+<g class="a-spin" style="animation-duration:40s"><circle cx="120" cy="130" r="104" fill="none" stroke="none"/>${rng(26,i=>{const a=Math.PI+i/26*Math.PI,r=92+(i*13)%22;return `<rect x="${(120+Math.cos(a)*r).toFixed(1)}" y="${(130+Math.sin(a)*r).toFixed(1)}" width="${2+(i%3)}" height="${2+(i%2)}" fill="${i%4?'#9aa3b5':'#ff8a5c'}"/>`})}</g>`;
+ART.demografia=`<rect width="240" height="130" fill="#0e0a18"/>
+${[[0,26],[1,34],[2,40],[3,44],[4,46],[5,44],[6,40],[7,34]].map(([i,w])=>`<rect x="${120-w}" y="${18+i*12}" width="${w}" height="10" fill="#38c8ff" opacity=".85"/><rect x="120" y="${18+i*12}" width="${w}" height="10" fill="#ff7fb0" opacity=".85"/>`).join("")}
+<text x="12" y="24" fill="#8d9bb8" font-family="JetBrains Mono,monospace" font-size="9">+ mayores</text><text x="12" y="112" fill="#8d9bb8" font-family="JetBrains Mono,monospace" font-size="9">− niños</text>`;
+
+/* ───────── Retos: datos ───────── */
+const CLOCK=[[1947,420],[1949,180],[1953,120],[1960,420],[1963,720],[1968,420],[1969,600],[1972,720],[1974,540],[1980,420],[1981,240],[1984,180],[1988,360],[1990,600],[1991,1020],[1995,840],[1998,540],[2002,420],[2007,300],[2010,360],[2012,300],[2015,180],[2017,150],[2018,120],[2020,100],[2023,90],[2025,89],[2026,85]];
+const RISKS=[
+ {id:"ia",name:"IA fuera de control o mal usada",art:"ia",c:"#38c8ff",ord:10,xpE:"3 %",xpS:"0,38 %",
+  what:"Sistemas más capaces que nosotros que persigan objetivos distintos a los nuestros, o que alguien use para atacar, manipular o concentrar poder.",
+  num:[["×4–5","al año crece el cómputo de los mayores modelos (Epoch AI)"],["2025","primeros agentes que trabajan solos durante horas"]],
+  stop:"Investigación en alineamiento, evaluaciones de seguridad antes de cada lanzamiento, control del hardware y acuerdos internacionales."},
+ {id:"bio",name:"Pandemias diseñadas",art:"virus",c:"#ff5a8a",ord:30,
+  what:"Un patógeno modificado, liberado por error o a propósito, más contagioso y letal que cualquiera natural.",
+  num:[["≈15 M","muertes en exceso por la COVID-19 en 2020–21 (OMS)"],["cientos $","cuesta hoy leer un genoma; escribirlos también se abarata"]],
+  stop:"Control de la síntesis de ADN, vigilancia de aguas residuales, vacunas de ARNm listas en 100 días."},
+ {id:"nuclear",name:"Guerra nuclear",art:"nuclear",c:"#ff7a3c",ord:1000,xpE:"0,55 %",xpS:"0,07 %",
+  what:"Un intercambio a gran escala y el invierno nuclear posterior: el humo bloquearía el sol y hundiría las cosechas.",
+  num:[["12.187","ojivas en el mundo en 2026; ~2.100 en alerta máxima (SIPRI)"],["> 5.000 M","personas podrían morir de hambre tras una guerra EE. UU.–Rusia (Nature Food, 2022)"]],
+  stop:"Tratados de control de armas, líneas directas entre potencias y quitar las ojivas de la alerta máxima."},
+ {id:"clima",name:"Cambio climático extremo",art:"clima",c:"#ff6a2a",ord:1000,
+  what:"Superar puntos de no retorno (deshielo, selva amazónica, corrientes oceánicas) que disparen el calentamiento por sí solos.",
+  num:[["1,5 °C","superado por primera vez en un año completo: 2024 (Copernicus)"],["423 ppm","de CO₂; el límite seguro es 350"]],
+  stop:"Energía limpia barata (la solar ya es la más barata de la historia), electrificación y captura de carbono."},
+ {id:"eco",name:"Colapso de la naturaleza",art:"bio",c:"#4caf6a",ord:1000,
+  what:"Pérdida de especies, suelos y agua dulce hasta que los ecosistemas que nos alimentan dejen de funcionar.",
+  num:[["−73 %","en el tamaño medio de las poblaciones de fauna salvaje desde 1970 (WWF, 2024)"],["1,73","planetas Tierra consumimos al año"]],
+  stop:"Proteger el 30 % del planeta, agricultura de precisión, carne cultivada y economía circular."},
+ {id:"amr",name:"Superbacterias",art:"bacteria",c:"#6ad7d0",
+  what:"Bacterias resistentes a todos los antibióticos: una herida o una operación vuelven a ser mortales.",
+  num:[["1,14 M","muertes directas en 2021"],["39 M","muertes previstas entre 2025 y 2050 (The Lancet, 2024)"]],
+  stop:"Nuevos antibióticos diseñados por IA, fagos y menos antibióticos en ganadería."},
+ {id:"info",name:"Desinformación y pérdida de confianza",art:"desinfo",c:"#ffb547",
+  what:"Si no podemos distinguir lo real de lo falso, no podemos ponernos de acuerdo para resolver ningún otro reto.",
+  num:[["n.º 1","riesgo global a dos años según el Foro Económico Mundial (2024 y 2025)"],["segundos","cuesta generar un vídeo falso realista"]],
+  stop:"Marcas de autenticidad en el contenido, alfabetización mediática y plataformas transparentes."},
+ {id:"demo",name:"Invierno demográfico",art:"demografia",c:"#ff7fb0",
+  what:"Menos nacimientos y más mayores: menos trabajadores, más gasto en pensiones y salud.",
+  num:[["~10.300 M","pico de población hacia mediados de 2080 (ONU, 2024)"],["> 50 %","de los países ya tiene menos de 2,1 hijos por mujer"]],
+  stop:"Robots e IA que cubran el trabajo, vidas sanas más largas y migración ordenada."},
+ {id:"solar",name:"Tormenta solar extrema",art:"tormenta",c:"#ffd56a",
+  what:"Una erupción como la de 1859 (evento Carrington) hoy fundiría transformadores y apagaría redes eléctricas durante meses.",
+  num:[["≈12 %","de probabilidad por década, según una estimación de 2012"],["1859","la última gran tormenta; entonces solo afectó al telégrafo"]],
+  stop:"Satélites de alerta temprana y transformadores de repuesto."},
+ {id:"basura",name:"Basura espacial",art:"basura",c:"#9fe8ff",
+  what:"Choques en cadena (síndrome de Kessler) que dejen la órbita baja inutilizable: adiós a GPS, internet satelital y meteorología.",
+  num:[["≈40.000","objetos rastreados en órbita (ESA)"],["> 1 M","fragmentos de más de 1 cm"]],
+  stop:"Retirar los satélites al acabar su vida útil y misiones de limpieza."},
+ {id:"volcan",name:"Supervolcán",art:"volcan",c:"#ff8a3a",ord:10000,
+  what:"Una erupción como la de Toba (hace 74.000 años) enfriaría el planeta durante años.",
+  num:[["1 en 10.000","por siglo (Toby Ord)"]],stop:"Vigilancia y reservas de alimentos para varios años."},
+ {id:"asteroide",name:"Asteroide",art:"asteroide",c:"#c9a8ff",ord:1000000,
+  what:"Un impacto como el que acabó con los dinosaurios.",
+  num:[["1 en 1.000.000","por siglo (Toby Ord)"],["2022","la misión DART desvió un asteroide por primera vez"]],stop:"Telescopios de detección y misiones de desvío. Es el riesgo mejor controlado."}
+];
+const QUANTUM=[
+ {k:"bueno",t:"Lo que puede salvarnos",c:"#7fe0b0",items:[
+  ["Fármacos y materiales nuevos","Simular moléculas exactas: baterías, superconductores, fármacos a medida."],
+  ["Fertilizantes con menos energía","Entender la enzima FeMoco y abaratar el proceso Haber-Bosch, que consume en torno al 1–2 % de la energía mundial."],
+  ["Sensores cuánticos","Navegar sin GPS, escáneres cerebrales portátiles, encontrar agua y minerales bajo tierra."]]},
+ {k:"riesgo",t:"Lo que puede desestabilizarnos",c:"#ffb547",items:[
+  ["Q-Day: cae el cifrado","Un ordenador cuántico capaz de romper RSA abriría bancos, secretos de estado y comunicaciones. Lo grabado hoy podría leerse mañana («cosecha ahora, descifra después»)."],
+  ["Submarinos visibles","Los sensores cuánticos podrían detectar submarinos nucleares, que hoy garantizan la disuasión. Eso puede volver más inestable el equilibrio nuclear."],
+  ["Diseño de armas químicas o biológicas","La misma simulación que crea fármacos puede diseñar toxinas. Es un riesgo de doble uso, igual que con la IA."]]},
+ {k:"extremo",t:"Física extrema (muy improbable)",c:"#c9a8ff",items:[
+  ["Decaimiento del falso vacío","Si nuestro universo es metaestable, una burbuja de vacío más estable podría expandirse a la velocidad de la luz. Las medidas del bosón de Higgs apuntan a que es posible, pero con una vida media inmensamente mayor que la edad del universo."],
+  ["Agujeros negros y extrañones en colisionadores","Descartado: los rayos cósmicos producen colisiones mucho más energéticas desde hace miles de millones de años sin que haya pasado nada (informe de seguridad del LHC, 2008)."]]}
+];
+const PB=[["Clima","423 ppm CO₂ (límite 350)",1],["Biodiversidad","extinciones > 10 veces el límite",1],["Uso del suelo","59 % de bosque original (límite 75 %)",1],["Agua dulce","22,6 % alterada (límite 12,9 %)",1],["Nitrógeno y fósforo","fósforo ×3, nitrógeno ×2,7 sobre el límite",1],["Nuevos químicos","plásticos y sustancias sin evaluar",1],["Acidez del océano","cruzado por primera vez en 2025",1],["Aerosoles","dentro del límite y mejorando",0],["Capa de ozono","dentro del límite y recuperándose",0]];
+const OVERSHOOT=[[1971,359],[1980,309],[1990,284],[2000,267],[2010,219],[2019,210],[2020,235],[2025,205],[2026,211]];
+const LAGS=[
+ ["Electricidad",1879,null,"~700 M personas aún no la tienen"],
+ ["Penicilina",1928,1945,"17 años hasta la producción masiva"],
+ ["Vacunas de ARNm",1990,2020,"30 años hasta la primera aprobada"],
+ ["Internet (Web)",1991,null,"2.200 M personas siguen sin conexión"],
+ ["CRISPR",2012,2023,"11 años hasta la primera terapia"],
+ ["Fusión nuclear",1951,null,"más de 70 años y aún sin central comercial"],
+ ["Ley europea de IA",2021,2027,"6 años para aplicarse; la IA se multiplicó por más de 1.000"]
+];
+
+/* ───────── Retos: componentes ───────── */
+function Art({k,h}){return html`<svg viewBox="0 0 240 130" className="rart" style=${h?{height:h}:null} preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g dangerouslySetInnerHTML=${{__html:ART[k]||""}}></g></svg>`}
+function DoomClock(){
+  const [i,setI]=useState(CLOCK.length-1);
+  const [shown,setShown]=useState(420);
+  useEffect(()=>{const t=setTimeout(()=>setShown(CLOCK[i][1]),60);return()=>clearTimeout(t)},[i]);
+  const s=CLOCK[i][1];const ang=-shown/3600*360;
+  const lab=s>=120?(s%60?Math.floor(s/60)+" min "+(s%60)+" s":s/60+" minutos"):s+" segundos";
+  const min=Math.min(...CLOCK.map(c=>c[1]));
+  return html`<section className="rsec" id="r-reloj">
+    <div className="clockwrap">
+      <svg viewBox="-110 -110 220 130" className="clock" aria-label=${"Reloj del Juicio Final: "+lab}>
+        <defs><radialGradient id="cg"><stop offset="0" stopColor="#2a0a10"/><stop offset="1" stopColor="#0a0408"/></radialGradient></defs>
+        <circle r="100" fill="url(#cg)" stroke="#5a1a24" strokeWidth="3"/>
+        <path d="M0 0 L0 -100 A100 100 0 0 0 -70.7 -70.7 Z" fill="#ff3a4a" opacity=".12"/>
+        ${Array.from({length:60},(_,k)=>{const a=k/60*Math.PI*2;const big=k%5===0;return html`<line key=${k} x1=${Math.sin(a)*(big?84:90)} y1=${-Math.cos(a)*(big?84:90)} x2=${Math.sin(a)*96} y2=${-Math.cos(a)*96} stroke=${big?"#f2e8e8":"#6a3a44"} strokeWidth=${big?3:1.2}/>`})}
+        <text x="0" y="-60" textAnchor="middle" fill="#f2e8e8" fontSize="16" fontWeight="800" fontFamily="Unbounded, sans-serif">12</text>
+        <line x1="0" y1="0" x2="0" y2="-44" stroke="#f2e8e8" strokeWidth="5" strokeLinecap="round"/>
+        <g style=${{transform:`rotate(${ang}deg)`,transition:"transform 1.4s cubic-bezier(.3,1.4,.5,1)"}}><line x1="0" y1="8" x2="0" y2="-92" stroke="#ff3a4a" strokeWidth="3.5" strokeLinecap="round"/></g>
+        <circle r="7" fill="#ff3a4a"/>
+      </svg>
+      <div className="clocktxt">
+        <div className="rk">Reloj del Juicio Final · ${CLOCK[i][0]}</div>
+        <div className="rbig" style=${{color:s===min?"#ff3a4a":"#f2e8e8"}}>${lab}</div>
+        <div className="rp">para la medianoche${s===min?", lo más cerca de la historia":""}. Lo ajusta cada año el Bulletin of the Atomic Scientists, con premios Nobel, según el riesgo de nuclear, clima, IA y biotecnología.</div>
+      </div>
+    </div>
+    <label className="srow" htmlFor="reloj"><span>Viaja por su historia</span><span>${CLOCK[i][0]}</span></label>
+    <input id="reloj" type="range" min="0" max=${CLOCK.length-1} value=${i} style=${{"--p":(i/(CLOCK.length-1)*100)+"%"}} onInput=${e=>setI(+e.target.value)} onChange=${e=>setI(+e.target.value)} aria-label="Año del reloj"/>
+    <div className="srow"><span>1947: 7 min</span><span>1991: 17 min</span><span>2026</span></div>
+  </section>`;
+}
+function GapEnergy(){
+  const w=300,h=150,P=8;const yrs=[2012,2014,2016,2018,2020,2022,2024,2026];
+  const ia=y=>val(SERIES.ia,y)/val(SERIES.ia,2012);const el=y=>Math.pow(1.025,y-2012);
+  const X=y=>P+(y-2012)/14*(w-2*P);const Y=v=>h-P-Math.log10(v)/9.4*(h-2*P);
+  const p=f=>yrs.map((y,i)=>(i?"L":"M")+X(y)+" "+Y(f(y)).toFixed(1)).join(" ");
+  return html`<svg viewBox=${`0 0 ${w} ${h+16}`} className="rchart" role="img" aria-label="Cómputo de la IA frente a electricidad mundial">
+    <path d=${p(ia)+` L${X(2026)} ${Y(el(2026))} `+[...yrs].reverse().map(y=>"L"+X(y)+" "+Y(el(y)).toFixed(1)).join(" ")+"Z"} fill="#ff3a4a" opacity=".12"/>
+    <path d=${p(ia)} fill="none" stroke="#38c8ff" strokeWidth="3"/><path d=${p(el)} fill="none" stroke="#ffb547" strokeWidth="3"/>
+    <text x=${P+4} y="14" fill="#38c8ff" fontSize="11" fontFamily="JetBrains Mono, monospace">— Cómputo de la IA ×2.000 M</text>
+    <text x=${X(2026)-4} y=${Y(el(2026))-6} textAnchor="end" fill="#ffb547" fontSize="11" fontFamily="JetBrains Mono, monospace">— Electricidad ×1,4</text>
+    <text x=${X(2019)} y=${Y(40)} textAnchor="middle" fill="#ff7a8a" fontSize="11" fontWeight="700" fontFamily="Unbounded, sans-serif">LA BRECHA</text>
+    <text x=${P} y=${h+12} fill="#8d9bb8" fontSize="10" fontFamily="JetBrains Mono, monospace">2012</text><text x=${w-P} y=${h+12} textAnchor="end" fill="#8d9bb8" fontSize="10" fontFamily="JetBrains Mono, monospace">2026</text>
+  </svg>`;
+}
+function GapAdoption(){
+  const y0=1870,y1=2045,X=y=>(y-y0)/(y1-y0)*100;
+  return html`<div className="lags">${LAGS.map(([n,a,b,t])=>html`<div className="lag" key=${n}>
+    <div className="ln"><b>${n}</b><span>${t}</span></div>
+    <div className="lt"><i className="ld" style=${{left:X(a)+"%"}}></i>
+      <i className=${"lb"+(b?"":" open")} style=${{left:X(a)+"%",width:(X(b||2026)-X(a))+"%"}}></i>
+      ${b&&html`<i className="le" style=${{left:X(b)+"%"}}></i>`}</div>
+  </div>`)}
+  <div className="laxis"><span>1870</span><span>1950</span><span>2026</span></div>
+  <div className="legend2"><span><i style=${{background:"#38c8ff",borderRadius:"50%"}}></i>Descubrimiento</span><span><i style=${{background:"#ffb547"}}></i>Espera hasta el uso masivo</span><span><i style=${{background:"repeating-linear-gradient(90deg,#ff5a5a 0 4px,transparent 4px 7px)"}}></i>Todavía sin llegar a todos</span></div></div>`;
+}
+function GapPlanet(){
+  const M=["E","F","M","A","M","J","J","A","S","O","N","D"];
+  return html`<div className="ovs">
+    <div className="ovm">${M.map((m,i)=>html`<span key=${i}>${m}</span>`)}</div>
+    ${OVERSHOOT.map(([y,d])=>html`<div className="ovr" key=${y}><span className="ovy">${y}</span><div className="ovb"><i style=${{width:(d/365*100)+"%"}}></i><b style=${{width:((365-d)/365*100)+"%"}}></b></div></div>`)}
+    <div className="legend2"><span><i style=${{background:"#4caf6a"}}></i>Lo que el planeta regenera en un año</span><span><i style=${{background:"#ff3a4a"}}></i>Deuda: consumo por encima de eso</span></div>
+  </div>`;
+}
+function Boundaries(){
+  const [sel,setSel]=useState(6);const n=PB.length;
+  const wedge=(i,r)=>{const a0=(i/n)*Math.PI*2-Math.PI/2+0.03,a1=((i+1)/n)*Math.PI*2-Math.PI/2-0.03;return `M0 0 L${Math.cos(a0)*r} ${Math.sin(a0)*r} A${r} ${r} 0 0 1 ${Math.cos(a1)*r} ${Math.sin(a1)*r}Z`};
+  const R=[96,84,62,78,92,70,58,30,26];
+  return html`<div className="pbw">
+    <svg viewBox="-110 -110 220 220" className="pb" role="img" aria-label="Límites planetarios">
+      ${PB.map((p,i)=>html`<path key=${i} d=${wedge(i,R[i])} fill=${p[2]?"#ff3a4a":"#4caf6a"} opacity=${sel===i?1:.55} style=${{cursor:"pointer",transition:"opacity .3s"}} onClick=${()=>setSel(i)}/>`)}
+      <circle r="44" fill="none" stroke="#7fe0b0" strokeWidth="2.5" strokeDasharray="4 4"/>
+      <circle r="18" fill="#2f6fd0"/>
+      <text y="-48" textAnchor="middle" fill="#7fe0b0" fontSize="8" fontFamily="JetBrains Mono, monospace">ZONA SEGURA</text>
+    </svg>
+    <div className="pbt"><div className="rbig" style=${{fontSize:"clamp(30px,8vw,44px)",color:"#ff3a4a"}}>7 de 9</div>
+      <div className="rp">límites del planeta ya superados (Instituto de Potsdam, 2025). Toca una porción:</div>
+      <div className="pbsel" style=${{borderColor:PB[sel][2]?"#ff3a4a":"#4caf6a"}}><b>${PB[sel][0]}</b><span>${PB[sel][1]}</span><em style=${{color:PB[sel][2]?"#ff7a8a":"#7fe0b0"}}>${PB[sel][2]?"Superado":"Dentro del límite"}</em></div></div>
+  </div>`;
+}
+function RiskList(){
+  const [open,setOpen]=useState("ia");
+  const pmax=Math.log10(1000000);
+  return html`<div className="risks">${RISKS.map(r=>{const on=open===r.id;return html`<article className=${"risk"+(on?" on":"")} key=${r.id} style=${{"--rc":r.c}}>
+    <button className="rhead" aria-expanded=${on?"true":"false"} onClick=${()=>setOpen(on?null:r.id)}>
+      <span className="rthumb"><${Art} k=${r.art}/></span>
+      <span className="rtt"><b>${r.name}</b>${r.ord?html`<span className="rprob"><i style=${{width:Math.max(4,(1-Math.log10(r.ord)/pmax)*100)+"%"}}></i></span><em>1 de ${fmtInt(r.ord).replace(/\B(?=(\d{3})+(?!\d))/g,".")} este siglo</em>`:html`<em>Riesgo de catástrofe, no de extinción</em>`}</span>
+      <${Ic} n="ChevronDown" size=${18}/>
+    </button>
+    ${on&&html`<div className="rbody">
+      <${Art} k=${r.art} h=${150}/>
+      <p>${r.what}</p>
+      <div className="rnums">${r.num.map(([a,b])=>html`<div key=${a}><b>${a}</b><span>${b}</span></div>`)}</div>
+      ${r.xpE&&html`<div className="rxp">Probabilidad de extinción humana antes de 2100 según el torneo de pronóstico XPT (2023): <b>expertos ${r.xpE}</b> · <b>superpronosticadores ${r.xpS}</b>. Los propios especialistas discrepan mucho.</div>`}
+      <div className="rstop"><${Ic} n="Shield" size=${15}/><span><b>Qué nos protege:</b> ${r.stop}</span></div>
+    </div>`}
+  </article>`})}</div>`;
+}
+function Die(){return html`<svg viewBox="0 0 80 80" className="die" aria-hidden="true"><rect x="4" y="4" width="72" height="72" rx="14" fill="#f2e8e8"/>${[[24,22],[24,40],[24,58],[56,22],[56,40],[56,58]].map(([x,y],i)=>html`<circle key=${i} cx=${x} cy=${y} r="6" fill=${i===0?"#ff3a4a":"#1a0a10"}/>`)}</svg>`}
+function QuantumTree(){
+  const [o,setO]=useState("riesgo");
+  return html`<div className="qtree">
+    <div className="qroot"><${Art} k="quantum" h=${120}/><div className="qrl">Ordenador cuántico útil · ~2029–2035</div></div>
+    <div className="qbr">${QUANTUM.map(b=>html`<button key=${b.k} aria-pressed=${o===b.k?"true":"false"} style=${{"--qc":b.c}} onClick=${()=>setO(b.k)}>${b.t}</button>`)}</div>
+    ${QUANTUM.filter(b=>b.k===o).map(b=>html`<div className="qitems" key=${b.k} style=${{"--qc":b.c}}>${b.items.map(([t,d])=>html`<div className="qit" key=${t}><b>${t}</b><span>${d}</span></div>`)}</div>`)}
+  </div>`;
+}
+function Futures(){
+  return html`<div className="fork">
+    <svg viewBox="0 0 300 120" className="forksvg" aria-hidden="true">
+      <path d="M150 118 L150 70" stroke="#eef3ff" strokeWidth="5" strokeLinecap="round"/>
+      <path d="M150 70 Q140 22 90 26 Q50 30 34 88" stroke="#ff3a4a" strokeWidth="5" fill="none" strokeLinecap="round" strokeDasharray="10 8"/>
+      <path d="M150 70 Q150 40 240 14" stroke="#7fe0b0" strokeWidth="5" fill="none" strokeLinecap="round"/>
+      <circle cx="150" cy="70" r="8" fill="#ffb547"/><text x="160" y="96" fill="#ffb547" fontSize="10" fontFamily="JetBrains Mono, monospace">HOY</text>
+    </svg>
+    <div className="fcols">
+      <div className="fc bad"><b>Cuello de botella</b><span>La tecnología corre más que la energía, las leyes y la confianza. Un error en IA, biotecnología o una guerra frena o hace retroceder la curva.</span></div>
+      <div className="fc good"><b>Abundancia</b><span>Energía limpia y barata, IA alineada y acuerdos globales. La curva sigue subiendo y llega a todos, no solo a unos pocos.</span></div>
+    </div>
+    <div className="note"><${Ic} n="Lightbulb" size=${16} color="#7fe0b0"/><span>Ya lo hemos hecho antes: en 1987 el Protocolo de Montreal prohibió los gases que destruían la capa de ozono. Hoy la capa de ozono está dentro de su límite seguro y se recuperará del todo hacia 2066.</span></div>
+  </div>`;
+}
+function RetosView(){
+  const box=useRef(null);
+  const go=id=>{const el=box.current&&box.current.querySelector("#"+id);if(el&&box.current)box.current.scrollTo({top:el.offsetTop-box.current.offsetTop-56,behavior:"smooth"})};
+  const NAV=[["r-reloj","Reloj"],["r-brechas","Brechas"],["r-riesgos","Riesgos"],["r-planeta","Planeta"],["r-cuantico","Cuántico"],["r-futuros","Futuros"]];
+  return html`<div className="data retos" ref=${box}>
+    <nav className="rnav">${NAV.map(([id,t])=>html`<button key=${id} onClick=${()=>go(id)}>${t}</button>`)}</nav>
+    <${DoomClock}/>
+    <section className="rsec" id="r-brechas">
+      <div className="rk">Tres brechas</div><h2 className="rh">La tecnología corre más que todo lo demás</h2>
+      <div className="gapc"><div className="gt"><span className="gn">1</span><b>La energía no sigue a la tecnología</b></div>
+        <${GapEnergy}/>
+        <p className="rp">Desde 2012 el cómputo para entrenar la IA se ha multiplicado por unos 2.000 millones; la electricidad mundial, por 1,4. Los centros de datos pasarán de 415 a 945 TWh entre 2024 y 2030, más que todo Japón (AIE). Escala logarítmica.</p></div>
+      <div className="gapc"><div className="gt"><span className="gn">2</span><b>Descubrir es rápido; llegar a todos, lento</b></div>
+        <${GapAdoption}/>
+        <p className="rp">Una app llega a 100 millones de personas en dos meses, pero la energía, la medicina y las leyes tardan décadas. 6.000 millones usan Internet; 2.200 millones, todavía no (UIT, 2025).</p></div>
+      <div className="gapc"><div className="gt"><span className="gn">3</span><b>Consumimos más de lo que el planeta regenera</b></div>
+        <${GapPlanet}/>
+        <p className="rp">El Día de la Sobrecapacidad de la Tierra marca cuándo agotamos lo que el planeta regenera en un año. En 1971 era el 25 de diciembre; en 2026, el 30 de julio. Usamos el equivalente a 1,73 Tierras.</p></div>
+    </section>
+    <section className="rsec" id="r-riesgos">
+      <div className="rk">Riesgos existenciales</div>
+      <div className="dice"><${Die}/><div><h2 className="rh" style=${{margin:0}}>1 de 6</h2><p className="rp">es la probabilidad de una catástrofe existencial este siglo según el filósofo de Oxford Toby Ord (<i>The Precipice</i>, 2020). Los superpronosticadores son más optimistas: un 1 % de extinción antes de 2100.</p></div></div>
+      <${RiskList}/>
+    </section>
+    <section className="rsec" id="r-planeta">
+      <div className="rk">Límites del planeta</div><h2 className="rh">Fuera de la zona segura</h2>
+      <${Boundaries}/>
+    </section>
+    <section className="rsec" id="r-cuantico">
+      <div className="rk">El mundo cuántico</div><h2 className="rh">¿Qué puede salir de ahí?</h2>
+      <${QuantumTree}/>
+    </section>
+    <section className="rsec" id="r-futuros">
+      <div className="rk">Hacia dónde vamos</div><h2 className="rh">Dos caminos desde hoy</h2>
+      <${Futures}/>
+    </section>
+    <div className="src">Fuentes: Bulletin of the Atomic Scientists (2026), SIPRI Yearbook 2026, Toby Ord (2020), Forecasting Research Institute (XPT, 2023), Instituto de Potsdam (Planetary Health Check 2025), Global Footprint Network (2026), AIE (Energía e IA, 2025), UIT (2025), OMS, The Lancet (2024), WWF (2024), ONU (WPP 2024), Copernicus, ESA. Las probabilidades de riesgo son estimaciones de expertos, no certezas.</div>
+  </div>`;
+}
+
 /* ───────── App ───────── */
 function App(){
   const [mode,setMode]=useState("hist");
@@ -1050,10 +1420,11 @@ function App(){
       <div className="seg" role="group" aria-label="Modo">
         <button aria-pressed=${mode==="hist"?"true":"false"} onClick=${()=>switchMode("hist")}><${Ic} n="Spline" size=${15}/>La curva</button>
         <button aria-pressed=${mode==="data"?"true":"false"} onClick=${()=>switchMode("data")}><${Ic} n="LineChart" size=${15}/>Datos</button>
+        <button aria-pressed=${mode==="retos"?"true":"false"} onClick=${()=>switchMode("retos")}><${Ic} n="ShieldAlert" size=${15}/>Retos</button>
       </div>
     </div>
 
-    ${mode==="data"?html`<${DataView} onJump=${jump}/>`:html`
+    ${mode==="retos"?html`<${RetosView}/>`:mode==="data"?html`<${DataView} onJump=${jump}/>`:html`
     <${Stage} stops=${stops} future=${future} idx=${idx} overview=${overview} onPick=${go}/>
     <div className="hud">
       ${overview?html`<div className="card enter" key=${"ov"+mode}>
